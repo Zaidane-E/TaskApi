@@ -5,6 +5,8 @@ Currently supports user tasks, task priorities, due dates, and completion tracki
 
 ---
 
+![main-page](img/page.png)
+
 ## Features
 
 - Task fields:
@@ -23,6 +25,7 @@ Currently supports user tasks, task priorities, due dates, and completion tracki
 - Optional guest mode (use the app without registering)
 - Timestamps
 - Overdue tasks
+- Sorting
 
 ---
 
