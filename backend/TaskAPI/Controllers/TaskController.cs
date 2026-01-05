@@ -15,9 +15,19 @@ namespace TaskAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(
+            [FromQuery] bool? isCompleted = null,
+            [FromQuery] Priority? priority = null)
         {
-            var tasks = await _context.Tasks.ToListAsync();
+            var query = _context.Tasks.AsQueryable();
+
+            if (isCompleted.HasValue)
+                query = query.Where(t => t.IsCompleted == isCompleted.Value);
+
+            if (priority.HasValue)
+                query = query.Where(t => t.Priority == priority.Value);
+
+            var tasks = await query.OrderByDescending(t => t.CreatedAt).ToListAsync();
             return Ok(tasks);
         }
 
@@ -33,7 +43,14 @@ namespace TaskAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateTaskDto dto)
         {
-            var task = new TaskItem { Title = dto.Title };
+            var task = new TaskItem
+            {
+                Title = dto.Title,
+                Priority = dto.Priority,
+                DueDate = dto.DueDate,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
@@ -48,6 +65,23 @@ namespace TaskAPI.Controllers
 
             task.Title = dto.Title;
             task.IsCompleted = dto.IsCompleted;
+            task.Priority = dto.Priority;
+            task.DueDate = dto.DueDate;
+            task.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Ok(task);
+        }
+
+        [HttpPatch("{id}/toggle")]
+        public async Task<IActionResult> ToggleComplete(int id)
+        {
+            var task = await _context.Tasks.FindAsync(id);
+            if (task == null)
+                return NotFound();
+
+            task.IsCompleted = !task.IsCompleted;
+            task.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
             return Ok(task);
