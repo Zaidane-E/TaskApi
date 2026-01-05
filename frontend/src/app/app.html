@@ -1,5 +1,5 @@
 <div class="container">
-  <h1>Task Manager</h1>
+  <h1>My TODO list</h1>
 
   @if (error()) {
     <div class="error">
@@ -8,22 +8,66 @@
     </div>
   }
 
-  <div class="add-task">
-    <input
-      type="text"
-      placeholder="Enter a new task..."
-      [ngModel]="newTaskTitle()"
-      (ngModelChange)="newTaskTitle.set($event)"
-      (keyup.enter)="addTask()"
-    />
-    <button class="btn-primary" (click)="addTask()">Add Task</button>
+  <div class="add-task-form">
+    <div class="form-row">
+      <input
+        type="text"
+        class="title-input"
+        placeholder="Enter a new task..."
+        [ngModel]="newTaskTitle()"
+        (ngModelChange)="newTaskTitle.set($event)"
+        (keyup.enter)="addTask()"
+      />
+    </div>
+    <div class="form-row">
+      <select
+        [ngModel]="newTaskPriority()"
+        (ngModelChange)="newTaskPriority.set($event)"
+      >
+        @for (p of priorities; track p) {
+          <option [value]="p">{{ p }}</option>
+        }
+      </select>
+      <input
+        type="date"
+        [ngModel]="newTaskDueDate()"
+        (ngModelChange)="newTaskDueDate.set($event)"
+      />
+      <button class="btn-primary" (click)="addTask()">Add Task</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <label>
+      Status:
+      <select
+        [ngModel]="filterStatus()"
+        (ngModelChange)="filterStatus.set($event); applyFilters()"
+      >
+        <option value="all">All</option>
+        <option value="pending">Pending</option>
+        <option value="completed">Completed</option>
+      </select>
+    </label>
+    <label>
+      Priority:
+      <select
+        [ngModel]="filterPriority()"
+        (ngModelChange)="filterPriority.set($event); applyFilters()"
+      >
+        <option value="all">All</option>
+        @for (p of priorities; track p) {
+          <option [value]="p">{{ p }}</option>
+        }
+      </select>
+    </label>
   </div>
 
   @if (loading()) {
     <div class="loading">Loading tasks...</div>
   } @else {
     @if (tasks().length === 0) {
-      <div class="empty">No tasks yet. Add one above!</div>
+      <div class="empty">No tasks found.</div>
     } @else {
       <ul class="task-list">
         @for (task of tasks(); track task.id) {
@@ -32,10 +76,24 @@
               <div class="edit-form">
                 <input
                   type="text"
+                  class="edit-title"
                   [ngModel]="editTitle()"
                   (ngModelChange)="editTitle.set($event)"
                   (keyup.enter)="saveEdit()"
                   (keyup.escape)="cancelEdit()"
+                />
+                <select
+                  [ngModel]="editPriority()"
+                  (ngModelChange)="editPriority.set($event)"
+                >
+                  @for (p of priorities; track p) {
+                    <option [value]="p">{{ p }}</option>
+                  }
+                </select>
+                <input
+                  type="date"
+                  [ngModel]="editDueDate()"
+                  (ngModelChange)="editDueDate.set($event)"
                 />
                 <button class="btn-save" (click)="saveEdit()">Save</button>
                 <button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
@@ -47,7 +105,17 @@
                   [checked]="task.isCompleted"
                   (change)="toggleComplete(task)"
                 />
-                <span class="task-title">{{ task.title }}</span>
+                <div class="task-info">
+                  <span class="task-title">{{ task.title }}</span>
+                  <div class="task-meta">
+                    <span class="priority-badge" [class]="getPriorityClass(task.priority)">
+                      {{ task.priority }}
+                    </span>
+                    @if (task.dueDate) {
+                      <span class="due-date">Due: {{ task.dueDate | date:'mediumDate' }}</span>
+                    }
+                  </div>
+                </div>
               </div>
               <div class="task-actions">
                 <button class="btn-edit" (click)="startEdit(task)">Edit</button>

@@ -1,5 +1,5 @@
 .container {
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
   padding: 2rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -31,13 +31,24 @@ h1 {
   color: #dc2626;
 }
 
-.add-task {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+.add-task-form {
+  background-color: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
 }
 
-.add-task input {
+.form-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.title-input {
   flex: 1;
   padding: 0.75rem 1rem;
   font-size: 1rem;
@@ -47,8 +58,48 @@ h1 {
   transition: border-color 0.2s;
 }
 
-.add-task input:focus {
+.title-input:focus {
   border-color: #3b82f6;
+}
+
+.form-row select,
+.form-row input[type="date"] {
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  outline: none;
+  background-color: white;
+}
+
+.form-row select:focus,
+.form-row input[type="date"]:focus {
+  border-color: #3b82f6;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+}
+
+.filters label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.filters select {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background-color: white;
 }
 
 .btn-primary {
@@ -113,11 +164,52 @@ h1 {
   width: 1.25rem;
   height: 1.25rem;
   cursor: pointer;
+  flex-shrink: 0;
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .task-title {
   font-size: 1rem;
   color: #374151;
+}
+
+.task-meta {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.priority-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.priority-low {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.priority-medium {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.priority-high {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.due-date {
+  font-size: 0.75rem;
+  color: #6b7280;
 }
 
 .task-actions {
@@ -174,15 +266,27 @@ h1 {
   display: flex;
   gap: 0.5rem;
   width: 100%;
+  flex-wrap: wrap;
 }
 
-.edit-form input {
+.edit-form .edit-title {
   flex: 1;
+  min-width: 200px;
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
   border: 2px solid #3b82f6;
   border-radius: 6px;
   outline: none;
+}
+
+.edit-form select,
+.edit-form input[type="date"] {
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  outline: none;
+  background-color: white;
 }
 
 .stats {

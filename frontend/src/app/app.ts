@@ -1,11 +1,12 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TaskService } from './services/task.service';
-import { Task } from './models/task.model';
+import { Task, Priority, TaskFilter } from './models/task.model';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -14,13 +15,23 @@ export class App implements OnInit {
 
   tasks = signal<Task[]>([]);
   newTaskTitle = signal('');
+  newTaskPriority = signal<Priority>('Medium');
+  newTaskDueDate = signal<string>('');
   editingTask = signal<Task | null>(null);
   editTitle = signal('');
+  editPriority = signal<Priority>('Medium');
+  editDueDate = signal<string>('');
   loading = signal(false);
   error = signal<string | null>(null);
 
+  // Filters
+  filterStatus = signal<string>('all');
+  filterPriority = signal<string>('all');
+
   completedCount = computed(() => this.tasks().filter(t => t.isCompleted).length);
   pendingCount = computed(() => this.tasks().filter(t => !t.isCompleted).length);
+
+  priorities: Priority[] = ['Low', 'Medium', 'High'];
 
   ngOnInit(): void {
     this.loadTasks();
@@ -29,7 +40,16 @@ export class App implements OnInit {
   loadTasks(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.taskService.getTasks().subscribe({
+
+    const filter: TaskFilter = {};
+    if (this.filterStatus() !== 'all') {
+      filter.isCompleted = this.filterStatus() === 'completed';
+    }
+    if (this.filterPriority() !== 'all') {
+      filter.priority = this.filterPriority() as Priority;
+    }
+
+    this.taskService.getTasks(filter).subscribe({
       next: (tasks) => {
         this.tasks.set(tasks);
         this.loading.set(false);
@@ -46,10 +66,16 @@ export class App implements OnInit {
     const title = this.newTaskTitle().trim();
     if (!title) return;
 
-    this.taskService.createTask({ title }).subscribe({
+    this.taskService.createTask({
+      title,
+      priority: this.newTaskPriority(),
+      dueDate: this.newTaskDueDate() || null
+    }).subscribe({
       next: (task) => {
-        this.tasks.update(tasks => [...tasks, task]);
+        this.tasks.update(tasks => [task, ...tasks]);
         this.newTaskTitle.set('');
+        this.newTaskPriority.set('Medium');
+        this.newTaskDueDate.set('');
       },
       error: (err) => {
         this.error.set('Failed to create task.');
@@ -59,17 +85,14 @@ export class App implements OnInit {
   }
 
   toggleComplete(task: Task): void {
-    this.taskService.updateTask(task.id, {
-      title: task.title,
-      isCompleted: !task.isCompleted
-    }).subscribe({
+    this.taskService.toggleComplete(task.id).subscribe({
       next: (updatedTask) => {
         this.tasks.update(tasks =>
           tasks.map(t => t.id === updatedTask.id ? updatedTask : t)
         );
       },
       error: (err) => {
-        this.error.set('Failed to update task.');
+        this.error.set('Failed to toggle task.');
         console.error(err);
       }
     });
@@ -78,6 +101,8 @@ export class App implements OnInit {
   startEdit(task: Task): void {
     this.editingTask.set(task);
     this.editTitle.set(task.title);
+    this.editPriority.set(task.priority);
+    this.editDueDate.set(task.dueDate ? task.dueDate.split('T')[0] : '');
   }
 
   saveEdit(): void {
@@ -89,7 +114,9 @@ export class App implements OnInit {
 
     this.taskService.updateTask(task.id, {
       title,
-      isCompleted: task.isCompleted
+      isCompleted: task.isCompleted,
+      priority: this.editPriority(),
+      dueDate: this.editDueDate() || null
     }).subscribe({
       next: (updatedTask) => {
         this.tasks.update(tasks =>
@@ -107,6 +134,8 @@ export class App implements OnInit {
   cancelEdit(): void {
     this.editingTask.set(null);
     this.editTitle.set('');
+    this.editPriority.set('Medium');
+    this.editDueDate.set('');
   }
 
   deleteTask(id: number): void {
@@ -119,5 +148,13 @@ export class App implements OnInit {
         console.error(err);
       }
     });
+  }
+
+  applyFilters(): void {
+    this.loadTasks();
+  }
+
+  getPriorityClass(priority: Priority): string {
+    return `priority-${priority.toLowerCase()}`;
   }
 }
