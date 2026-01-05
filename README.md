@@ -36,6 +36,8 @@ Currently supports user tasks, task priorities, due dates, and completion tracki
 - **Testing:** xUnit
 - **Other:** Swagger/OpenAPI, Git
 
+![swagger-page](img/swagger.png)
+
 ---
 
 ## Setup Instructions
