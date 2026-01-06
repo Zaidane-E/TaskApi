@@ -25,7 +25,9 @@ Currently supports user tasks, task priorities, due dates, and completion tracki
 - Optional guest mode (use the app without registering)
 - Timestamps
 - Overdue tasks
-- Sorting
+- Introduce a layered architecture for scalability
+- Separate concerns 
+- Extract tasks into its own component
 
 ---
 
