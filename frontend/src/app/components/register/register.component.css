@@ -1,0 +1,262 @@
+/* Persona 3 Reload - Register Page */
+
+.auth-container {
+  min-height: calc(100vh - 56px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  position: relative;
+  background: transparent;
+}
+
+/* Decorative background elements */
+.auth-container::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.auth-card {
+  background: linear-gradient(180deg, rgba(15, 37, 64, 0.95) 0%, rgba(10, 10, 20, 0.98) 100%);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  border: 2px solid var(--p3r-cyan-dark);
+  position: relative;
+  animation: scaleIn 0.4s ease;
+  box-shadow: var(--p3r-shadow), 0 0 40px rgba(0, 212, 255, 0.1);
+}
+
+/* Corner decorations */
+.auth-card::before,
+.auth-card::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--p3r-cyan);
+}
+
+.auth-card::before {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.auth-card::after {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+}
+
+h1 {
+  text-align: center;
+  color: var(--p3r-white);
+  margin-bottom: 2rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  position: relative;
+}
+
+h1::before {
+  content: '◆';
+  color: var(--p3r-cyan);
+  margin-right: 0.75rem;
+  animation: textGlow 2s infinite;
+}
+
+h1::after {
+  content: '◆';
+  color: var(--p3r-cyan);
+  margin-left: 0.75rem;
+  animation: textGlow 2s infinite;
+}
+
+.error-message {
+  background: linear-gradient(135deg, rgba(255, 26, 75, 0.2) 0%, rgba(204, 21, 64, 0.1) 100%);
+  border: 1px solid var(--p3r-red);
+  color: var(--p3r-red);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  animation: slideDown 0.3s ease, pulseRed 2s infinite;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--p3r-gray);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  background: rgba(10, 10, 20, 0.8);
+  border: 2px solid var(--p3r-blue);
+  color: var(--p3r-white);
+  outline: none;
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.form-group input::placeholder {
+  color: var(--p3r-gray);
+}
+
+.form-group input:hover {
+  border-color: var(--p3r-cyan-dark);
+}
+
+.form-group input:focus {
+  border-color: var(--p3r-cyan);
+  box-shadow: var(--p3r-glow-cyan), inset 0 0 20px rgba(0, 212, 255, 0.1);
+}
+
+.form-group input:disabled {
+  background: rgba(10, 10, 20, 0.5);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Sync Option - P3R Special Panel */
+.sync-option {
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 180, 216, 0.05) 100%);
+  border: 1px solid var(--p3r-green);
+  border-left: 4px solid var(--p3r-green);
+  animation: slideDown 0.3s ease;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--p3r-white);
+  font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: rgba(10, 10, 20, 0.8);
+  border: 2px solid var(--p3r-green);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.checkbox-label input[type="checkbox"]:hover {
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+  background: var(--p3r-green);
+}
+
+.checkbox-label input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--p3r-dark-blue);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--p3r-cyan-dark) 0%, var(--p3r-cyan) 100%);
+  color: var(--p3r-dark-blue);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin-top: 0.5rem;
+  clip-path: polygon(15px 0%, 100% 0%, calc(100% - 15px) 100%, 0% 100%);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--p3r-cyan) 0%, var(--p3r-cyan-glow) 100%);
+  box-shadow: var(--p3r-glow-cyan-strong);
+  transform: translateY(-2px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  background: linear-gradient(135deg, var(--p3r-blue) 0%, var(--p3r-cyan-dark) 100%);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 2rem;
+  color: var(--p3r-gray);
+  font-size: 0.9rem;
+}
+
+.auth-link a {
+  color: var(--p3r-cyan);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.auth-link a:hover {
+  color: var(--p3r-cyan-glow);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 1.75rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+  }
+
+  h1::before,
+  h1::after {
+    display: none;
+  }
+
+  .sync-option {
+    padding: 1rem;
+  }
+}

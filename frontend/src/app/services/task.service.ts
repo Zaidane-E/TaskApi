@@ -18,6 +18,12 @@ export class TaskService {
     if (filter?.priority) {
       params = params.set('priority', filter.priority);
     }
+    if (filter?.sortBy) {
+      params = params.set('sortBy', filter.sortBy);
+    }
+    if (filter?.sortOrder) {
+      params = params.set('sortOrder', filter.sortOrder);
+    }
     return this.http.get<Task[]>(this.apiUrl, { params });
   }
 

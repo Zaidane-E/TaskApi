@@ -6,8 +6,10 @@ export interface Task {
   isCompleted: boolean;
   priority: Priority;
   dueDate: string | null;
+  completedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  isOverdue?: boolean;
 }
 
 export interface CreateTask {
@@ -26,4 +28,6 @@ export interface UpdateTask {
 export interface TaskFilter {
   isCompleted?: boolean;
   priority?: Priority;
+  sortBy?: 'priority' | 'dueDate' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
 }

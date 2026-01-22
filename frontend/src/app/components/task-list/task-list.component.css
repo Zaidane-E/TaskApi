@@ -1,0 +1,630 @@
+/* Persona 3 Reload - Task List */
+
+.task-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem 2rem;
+  animation: fadeIn 0.4s ease;
+}
+
+/* Guest Banner - P3R Warning Style */
+.guest-banner {
+  background: linear-gradient(135deg, rgba(255, 217, 61, 0.15) 0%, rgba(255, 190, 11, 0.1) 100%);
+  border: 2px solid var(--p3r-yellow);
+  color: var(--p3r-yellow);
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  position: relative;
+}
+
+.guest-banner::before {
+  content: '⚠';
+  margin-right: 0.5rem;
+}
+
+.guest-banner a {
+  color: var(--p3r-cyan);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.guest-banner a:hover {
+  text-shadow: var(--p3r-glow-cyan);
+}
+
+/* Error Alert - P3R Danger Style */
+.error {
+  background: linear-gradient(135deg, rgba(255, 26, 75, 0.2) 0%, rgba(204, 21, 64, 0.1) 100%);
+  border: 2px solid var(--p3r-red);
+  color: var(--p3r-red);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideDown 0.4s ease, pulseRed 2s infinite;
+}
+
+.btn-close {
+  background: transparent;
+  border: 1px solid var(--p3r-red);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--p3r-red);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+  background: var(--p3r-red);
+  color: var(--p3r-white);
+}
+
+/* Add Task Form - P3R Panel Style */
+.add-task-form {
+  background: linear-gradient(180deg, rgba(15, 37, 64, 0.9) 0%, rgba(13, 26, 45, 0.95) 100%);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid var(--p3r-cyan-dark);
+  position: relative;
+  animation: scaleIn 0.3s ease;
+}
+
+.add-task-form::before {
+  content: 'NEW TASK';
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  background: var(--p3r-midnight);
+  color: var(--p3r-cyan);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  border: 1px solid var(--p3r-cyan-dark);
+}
+
+.form-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Input Fields - P3R Style */
+.title-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  background: rgba(10, 10, 20, 0.8);
+  border: 2px solid var(--p3r-blue);
+  color: var(--p3r-white);
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.title-input::placeholder {
+  color: var(--p3r-gray);
+}
+
+.title-input:hover {
+  border-color: var(--p3r-cyan-dark);
+}
+
+.title-input:focus {
+  border-color: var(--p3r-cyan);
+  box-shadow: var(--p3r-glow-cyan), inset 0 0 20px rgba(0, 212, 255, 0.1);
+}
+
+.form-row select,
+.form-row input[type="date"] {
+  padding: 0.75rem 0.875rem;
+  font-size: 0.9rem;
+  background: rgba(10, 10, 20, 0.8);
+  border: 2px solid var(--p3r-blue);
+  color: var(--p3r-white);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.form-row select:hover,
+.form-row input[type="date"]:hover {
+  border-color: var(--p3r-cyan-dark);
+}
+
+.form-row select:focus,
+.form-row input[type="date"]:focus {
+  border-color: var(--p3r-cyan);
+  box-shadow: var(--p3r-glow-cyan);
+  outline: none;
+}
+
+.form-row select option {
+  background: var(--p3r-dark-blue);
+  color: var(--p3r-white);
+}
+
+/* Primary Button - P3R Cyan Action */
+.btn-primary {
+  padding: 0.75rem 2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, var(--p3r-cyan-dark) 0%, var(--p3r-cyan) 100%);
+  color: var(--p3r-dark-blue);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--p3r-cyan) 0%, var(--p3r-cyan-glow) 100%);
+  box-shadow: var(--p3r-glow-cyan-strong);
+  transform: translateY(-2px);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* Filters - P3R Control Panel */
+.filters {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(180deg, rgba(26, 58, 92, 0.3) 0%, rgba(15, 37, 64, 0.4) 100%);
+  border: 1px solid var(--p3r-blue);
+  border-left: 3px solid var(--p3r-cyan);
+  flex-wrap: wrap;
+  animation: slideDown 0.35s ease;
+}
+
+.filters label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--p3r-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filters select {
+  padding: 0.5rem 0.75rem;
+  background: rgba(10, 10, 20, 0.9);
+  border: 1px solid var(--p3r-blue);
+  color: var(--p3r-white);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.filters select:hover {
+  border-color: var(--p3r-cyan-dark);
+}
+
+.filters select:focus {
+  border-color: var(--p3r-cyan);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+  outline: none;
+}
+
+/* Loading & Empty State */
+.loading {
+  text-align: center;
+  color: var(--p3r-cyan);
+  padding: 3rem 2rem;
+  font-size: 1rem;
+  animation: textGlow 2s infinite;
+}
+
+.empty {
+  text-align: center;
+  color: var(--p3r-gray);
+  padding: 4rem 2rem;
+  font-size: 1.125rem;
+  background: linear-gradient(180deg, rgba(15, 37, 64, 0.5) 0%, rgba(13, 26, 45, 0.3) 100%);
+  border: 2px dashed var(--p3r-blue);
+  animation: fadeIn 0.4s ease;
+}
+
+.empty::before {
+  content: '◇';
+  display: block;
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--p3r-cyan);
+  animation: textGlow 2s infinite;
+}
+
+/* Task List */
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Task Item - P3R Card Style */
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(15, 37, 64, 0.8) 0%, rgba(13, 26, 45, 0.9) 100%);
+  border: 1px solid var(--p3r-blue);
+  border-left: 4px solid var(--p3r-cyan);
+  margin-bottom: 0.75rem;
+  transition: all 0.25s ease;
+  animation: slideDown 0.35s ease backwards;
+  position: relative;
+}
+
+/* Stagger animation for task items */
+.task-item:nth-child(1) { animation-delay: 0.05s; }
+.task-item:nth-child(2) { animation-delay: 0.1s; }
+.task-item:nth-child(3) { animation-delay: 0.15s; }
+.task-item:nth-child(4) { animation-delay: 0.2s; }
+.task-item:nth-child(5) { animation-delay: 0.25s; }
+
+.task-item:hover {
+  border-color: var(--p3r-cyan-dark);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.2), inset 0 0 30px rgba(0, 212, 255, 0.05);
+  transform: translateX(5px);
+}
+
+/* Completed Task */
+.task-item.completed {
+  border-left-color: var(--p3r-green);
+  opacity: 0.7;
+}
+
+.task-item.completed .task-title {
+  text-decoration: line-through;
+  color: var(--p3r-gray);
+}
+
+.task-item.completed:hover {
+  opacity: 0.9;
+}
+
+/* Overdue Task */
+.task-item.overdue:not(.completed) {
+  border-left-color: var(--p3r-red);
+  background: linear-gradient(135deg, rgba(255, 26, 75, 0.15) 0%, rgba(13, 26, 45, 0.9) 100%);
+  animation: slideDown 0.35s ease backwards, pulseRed 3s infinite;
+}
+
+.task-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+/* Custom Checkbox - P3R Style */
+.task-content input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: rgba(10, 10, 20, 0.8);
+  border: 2px solid var(--p3r-cyan-dark);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.task-content input[type="checkbox"]:hover {
+  border-color: var(--p3r-cyan);
+  box-shadow: var(--p3r-glow-cyan);
+}
+
+.task-content input[type="checkbox"]:checked {
+  background: var(--p3r-green);
+  border-color: var(--p3r-green);
+}
+
+.task-content input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--p3r-dark-blue);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.task-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--p3r-white);
+  transition: color 0.2s ease;
+}
+
+.task-meta {
+  display: flex;
+  gap: 0.625rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Priority Badges - P3R Style */
+.priority-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
+}
+
+.priority-low {
+  background: linear-gradient(135deg, var(--p3r-teal) 0%, var(--p3r-cyan-dark) 100%);
+  color: var(--p3r-dark-blue);
+}
+
+.priority-medium {
+  background: linear-gradient(135deg, var(--p3r-yellow) 0%, var(--p3r-gold) 100%);
+  color: var(--p3r-dark-blue);
+}
+
+.priority-high {
+  background: linear-gradient(135deg, var(--p3r-red) 0%, var(--p3r-red-dark) 100%);
+  color: var(--p3r-white);
+}
+
+.overdue-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: var(--p3r-red);
+  color: var(--p3r-white);
+  animation: pulseRed 1.5s infinite;
+}
+
+.due-date, .completed-date {
+  font-size: 0.75rem;
+  color: var(--p3r-gray);
+}
+
+.completed-date {
+  color: var(--p3r-green);
+}
+
+/* Task Actions */
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.task-item:hover .task-actions {
+  opacity: 1;
+}
+
+.btn-edit, .btn-delete, .btn-save, .btn-cancel {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-edit {
+  background: transparent;
+  color: var(--p3r-yellow);
+  border: 1px solid var(--p3r-yellow);
+}
+
+.btn-edit:hover {
+  background: var(--p3r-yellow);
+  color: var(--p3r-dark-blue);
+  box-shadow: var(--p3r-glow-yellow);
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background: transparent;
+  color: var(--p3r-red);
+  border: 1px solid var(--p3r-red);
+}
+
+.btn-delete:hover {
+  background: var(--p3r-red);
+  color: var(--p3r-white);
+  box-shadow: var(--p3r-glow-red);
+  transform: translateY(-2px);
+}
+
+.btn-save {
+  background: linear-gradient(135deg, var(--p3r-green) 0%, #00cc6a 100%);
+  color: var(--p3r-dark-blue);
+  border: none;
+}
+
+.btn-save:hover {
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+  transform: translateY(-2px);
+}
+
+.btn-cancel {
+  background: transparent;
+  color: var(--p3r-gray);
+  border: 1px solid var(--p3r-gray);
+}
+
+.btn-cancel:hover {
+  background: var(--p3r-gray);
+  color: var(--p3r-dark-blue);
+  transform: translateY(-2px);
+}
+
+/* Button active states */
+.btn-edit:active,
+.btn-delete:active,
+.btn-save:active,
+.btn-cancel:active {
+  transform: scale(0.95);
+}
+
+/* Edit Form */
+.edit-form {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  flex-wrap: wrap;
+  animation: scaleIn 0.2s ease;
+}
+
+.edit-form .edit-title {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.625rem 0.875rem;
+  font-size: 1rem;
+  background: rgba(10, 10, 20, 0.9);
+  border: 2px solid var(--p3r-cyan);
+  color: var(--p3r-white);
+  outline: none;
+  box-shadow: var(--p3r-glow-cyan);
+}
+
+.edit-form select,
+.edit-form input[type="date"] {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  background: rgba(10, 10, 20, 0.9);
+  border: 2px solid var(--p3r-blue);
+  color: var(--p3r-white);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.edit-form select:focus,
+.edit-form input[type="date"]:focus {
+  border-color: var(--p3r-cyan);
+}
+
+/* Stats Footer - P3R Data Panel */
+.stats {
+  margin-top: 2rem;
+  text-align: center;
+  color: var(--p3r-white);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(180deg, rgba(26, 58, 92, 0.4) 0%, rgba(15, 37, 64, 0.5) 100%);
+  border: 1px solid var(--p3r-blue);
+  border-top: 3px solid var(--p3r-cyan);
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  animation: fadeIn 0.4s ease 0.3s backwards;
+  position: relative;
+}
+
+.stats::before {
+  content: 'STATUS';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--p3r-midnight);
+  color: var(--p3r-cyan);
+  padding: 0.25rem 1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  border: 1px solid var(--p3r-cyan-dark);
+}
+
+.stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.8rem;
+}
+
+.stats .count {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--p3r-cyan);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .task-container {
+    padding: 0.5rem;
+  }
+
+  .add-task-form {
+    padding: 1.25rem;
+  }
+
+  .task-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .task-actions {
+    width: 100%;
+    justify-content: flex-end;
+    opacity: 1;
+  }
+
+  .filters {
+    gap: 0.75rem;
+    padding: 0.875rem;
+  }
+
+  .filters label {
+    flex: 1;
+    min-width: 120px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .filters select {
+    width: 100%;
+  }
+
+  .stats {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}

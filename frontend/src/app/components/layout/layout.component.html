@@ -1,0 +1,26 @@
+<div class="layout">
+  <header class="header">
+    <div class="header-content">
+      <h1 class="logo">
+        <a routerLink="/tasks">My TODO List</a>
+      </h1>
+      <nav class="nav">
+        @if (authService.isAuthenticated()) {
+          <span class="user-email">{{ authService.user()?.email }}</span>
+          <button class="btn-logout" (click)="logout()">Logout</button>
+        } @else if (authService.isGuest()) {
+          <span class="guest-label">Guest Mode</span>
+          <a routerLink="/register" class="btn-register">Register</a>
+          <button class="btn-logout" (click)="exitGuestMode()">Exit</button>
+        } @else {
+          <a routerLink="/login" class="btn-nav">Login</a>
+          <a routerLink="/register" class="btn-register">Register</a>
+        }
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <router-outlet></router-outlet>
+  </main>
+</div>

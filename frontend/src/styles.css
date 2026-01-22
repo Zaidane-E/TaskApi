@@ -1,1 +1,191 @@
-/* You can add global styles to this file, and also import other style files */
+/* Persona 3 Reload - Global Styles */
+
+:root {
+  /* P3R Color Palette */
+  --p3r-dark-blue: #0a0a14;
+  --p3r-midnight: #0d1a2d;
+  --p3r-deep-blue: #0f2540;
+  --p3r-blue: #1a3a5c;
+  --p3r-cyan: #00d4ff;
+  --p3r-cyan-glow: #00e5ff;
+  --p3r-cyan-dark: #0096c7;
+  --p3r-teal: #00b4d8;
+  --p3r-white: #e8f4f8;
+  --p3r-gray: #8eafc4;
+  --p3r-red: #ff1a4b;
+  --p3r-red-dark: #cc1540;
+  --p3r-yellow: #ffd93d;
+  --p3r-gold: #ffbe0b;
+  --p3r-green: #00ff88;
+
+  /* Shadows & Glows */
+  --p3r-glow-cyan: 0 0 10px rgba(0, 212, 255, 0.5), 0 0 20px rgba(0, 212, 255, 0.3);
+  --p3r-glow-cyan-strong: 0 0 15px rgba(0, 212, 255, 0.7), 0 0 30px rgba(0, 212, 255, 0.4), 0 0 45px rgba(0, 212, 255, 0.2);
+  --p3r-glow-red: 0 0 10px rgba(255, 26, 75, 0.5), 0 0 20px rgba(255, 26, 75, 0.3);
+  --p3r-glow-yellow: 0 0 10px rgba(255, 217, 61, 0.5), 0 0 20px rgba(255, 217, 61, 0.3);
+  --p3r-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  line-height: 1.6;
+  color: var(--p3r-white);
+  background: linear-gradient(135deg, var(--p3r-dark-blue) 0%, var(--p3r-midnight) 50%, var(--p3r-deep-blue) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scanline overlay effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 212, 255, 0.03) 2px,
+    rgba(0, 212, 255, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Keyframe Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: var(--p3r-glow-cyan);
+  }
+  50% {
+    box-shadow: var(--p3r-glow-cyan-strong);
+  }
+}
+
+@keyframes textGlow {
+  0%, 100% {
+    text-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 15px rgba(0, 212, 255, 0.8), 0 0 25px rgba(0, 212, 255, 0.4);
+  }
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    border-color: var(--p3r-cyan-dark);
+  }
+  50% {
+    border-color: var(--p3r-cyan);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulseRed {
+  0%, 100% {
+    box-shadow: var(--p3r-glow-red);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 26, 75, 0.8), 0 0 40px rgba(255, 26, 75, 0.4);
+  }
+}
+
+/* Selection styling */
+::selection {
+  background: var(--p3r-cyan);
+  color: var(--p3r-dark-blue);
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--p3r-cyan);
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--p3r-dark-blue);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--p3r-blue);
+  border: 1px solid var(--p3r-cyan-dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--p3r-cyan-dark);
+  box-shadow: var(--p3r-glow-cyan);
+}
+
+/* Links */
+a {
+  color: var(--p3r-cyan);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+a:hover {
+  color: var(--p3r-cyan-glow);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}

@@ -1,5 +1,9 @@
-<div class="container">
-  <h1>My TODO list</h1>
+<div class="task-container">
+  @if (isGuest()) {
+    <div class="guest-banner">
+      You're in guest mode. <a routerLink="/register">Register</a> to save your tasks permanently.
+    </div>
+  }
 
   @if (error()) {
     <div class="error">
@@ -61,17 +65,38 @@
         }
       </select>
     </label>
+    <label>
+      Sort:
+      <select
+        [ngModel]="sortBy()"
+        (ngModelChange)="sortBy.set($event); applyFilters()"
+      >
+        <option value="createdAt">Created</option>
+        <option value="dueDate">Due Date</option>
+        <option value="priority">Priority</option>
+      </select>
+    </label>
+    <label>
+      Order:
+      <select
+        [ngModel]="sortOrder()"
+        (ngModelChange)="sortOrder.set($event); applyFilters()"
+      >
+        <option value="desc">Newest</option>
+        <option value="asc">Oldest</option>
+      </select>
+    </label>
   </div>
 
   @if (loading()) {
     <div class="loading">Loading tasks...</div>
   } @else {
     @if (tasks().length === 0) {
-      <div class="empty">No tasks found.</div>
+      <div class="empty">No tasks found. Add your first task above!</div>
     } @else {
       <ul class="task-list">
         @for (task of tasks(); track task.id) {
-          <li class="task-item" [class.completed]="task.isCompleted">
+          <li class="task-item" [class.completed]="task.isCompleted" [class.overdue]="task.isOverdue">
             @if (editingTask()?.id === task.id) {
               <div class="edit-form">
                 <input
@@ -111,8 +136,14 @@
                     <span class="priority-badge" [class]="getPriorityClass(task.priority)">
                       {{ task.priority }}
                     </span>
+                    @if (task.isOverdue) {
+                      <span class="overdue-badge">Overdue</span>
+                    }
                     @if (task.dueDate) {
-                      <span class="due-date">Due: {{ task.dueDate | date:'mediumDate' }}</span>
+                      <span class="due-date">Due: {{ formatDate(task.dueDate) }}</span>
+                    }
+                    @if (task.completedAt) {
+                      <span class="completed-date">Completed: {{ formatDate(task.completedAt) }}</span>
                     }
                   </div>
                 </div>
@@ -129,8 +160,8 @@
   }
 
   <div class="stats">
-    Total: {{ tasks().length }} |
-    Completed: {{ completedCount() }} |
-    Pending: {{ pendingCount() }}
+    <span>Total: <span class="count">{{ tasks().length }}</span></span>
+    <span>Completed: <span class="count">{{ completedCount() }}</span></span>
+    <span>Pending: <span class="count">{{ pendingCount() }}</span></span>
   </div>
 </div>

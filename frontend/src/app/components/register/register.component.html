@@ -1,0 +1,73 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h1>Create Account</h1>
+
+    @if (error()) {
+      <div class="error-message">{{ error() }}</div>
+    }
+
+    <form (ngSubmit)="register()">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          name="email"
+          placeholder="Enter your email"
+          [disabled]="loading()"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          name="password"
+          placeholder="At least 6 characters"
+          [disabled]="loading()"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          [ngModel]="confirmPassword()"
+          (ngModelChange)="confirmPassword.set($event)"
+          name="confirmPassword"
+          placeholder="Confirm your password"
+          [disabled]="loading()"
+        />
+      </div>
+
+      @if (hasGuestTasks) {
+        <div class="sync-option">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [ngModel]="syncGuestTasks()"
+              (ngModelChange)="syncGuestTasks.set($event)"
+              name="syncGuestTasks"
+              [disabled]="loading()"
+            />
+            <span>Sync my guest tasks to my new account</span>
+          </label>
+        </div>
+      }
+
+      <button type="submit" class="btn-primary" [disabled]="loading()">
+        {{ loading() ? 'Creating account...' : 'Create Account' }}
+      </button>
+    </form>
+
+    <p class="auth-link">
+      Already have an account? <a routerLink="/login">Login</a>
+    </p>
+  </div>
+</div>
