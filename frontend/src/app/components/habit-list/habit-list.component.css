@@ -1,0 +1,834 @@
+/* Persona 3 Reload - Habit List */
+
+.habit-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem 2rem;
+  animation: fadeIn 0.4s ease;
+}
+
+/* Progress Section - P3R Style */
+.progress-section {
+  background: linear-gradient(180deg, rgba(15, 37, 64, 0.9) 0%, rgba(13, 26, 45, 0.95) 100%);
+  padding: 0.625rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--p3r-cyan-dark);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: fit-content;
+}
+
+.progress-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--p3r-cyan);
+  text-transform: uppercase;
+}
+
+.progress-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--p3r-white);
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(10, 10, 20, 0.8);
+  border: 1px solid var(--p3r-blue);
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--p3r-cyan-dark) 0%, var(--p3r-cyan) 50%, var(--p3r-green) 100%);
+  transition: width 0.5s ease;
+  position: relative;
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+  animation: shimmer 2s infinite;
+  background-size: 200% 100%;
+}
+
+.progress-percent {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--p3r-cyan);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+  min-width: 50px;
+  text-align: right;
+}
+
+/* Guest Banner - P3R Warning Style */
+.guest-banner {
+  background: linear-gradient(135deg, rgba(255, 217, 61, 0.15) 0%, rgba(255, 190, 11, 0.1) 100%);
+  border: 2px solid var(--p3r-yellow);
+  color: var(--p3r-yellow);
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  position: relative;
+}
+
+.guest-banner::before {
+  content: '\26A0';
+  margin-right: 0.5rem;
+}
+
+.guest-banner a {
+  color: var(--p3r-cyan);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.guest-banner a:hover {
+  text-shadow: var(--p3r-glow-cyan);
+}
+
+/* Error Alert - P3R Danger Style */
+.error {
+  background: linear-gradient(135deg, rgba(255, 26, 75, 0.2) 0%, rgba(204, 21, 64, 0.1) 100%);
+  border: 2px solid var(--p3r-red);
+  color: var(--p3r-red);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideDown 0.4s ease, pulseRed 2s infinite;
+}
+
+.btn-close {
+  background: transparent;
+  border: 1px solid var(--p3r-red);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--p3r-red);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+  background: var(--p3r-red);
+  color: var(--p3r-white);
+}
+
+/* Add Habit Form - P3R Panel Style */
+.add-habit-form {
+  background: linear-gradient(180deg, rgba(15, 37, 64, 0.9) 0%, rgba(13, 26, 45, 0.95) 100%);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid var(--p3r-cyan-dark);
+  position: relative;
+  animation: scaleIn 0.3s ease;
+}
+
+.add-habit-form::before {
+  content: 'NEW HABIT';
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  background: var(--p3r-midnight);
+  color: var(--p3r-cyan);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  border: 1px solid var(--p3r-cyan-dark);
+}
+
+.form-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Input Fields - P3R Style */
+.title-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  background: rgba(10, 10, 20, 0.8);
+  border: 2px solid var(--p3r-blue);
+  color: var(--p3r-white);
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.title-input::placeholder {
+  color: var(--p3r-gray);
+}
+
+.title-input:hover {
+  border-color: var(--p3r-cyan-dark);
+}
+
+.title-input:focus {
+  border-color: var(--p3r-cyan);
+  box-shadow: var(--p3r-glow-cyan), inset 0 0 20px rgba(0, 212, 255, 0.1);
+}
+
+.form-row select {
+  padding: 0.75rem 0.875rem;
+  font-size: 0.9rem;
+  background: rgba(10, 10, 20, 0.8);
+  border: 2px solid var(--p3r-blue);
+  color: var(--p3r-white);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.form-row select:hover {
+  border-color: var(--p3r-cyan-dark);
+}
+
+.form-row select:focus {
+  border-color: var(--p3r-cyan);
+  box-shadow: var(--p3r-glow-cyan);
+  outline: none;
+}
+
+.form-row select option {
+  background: var(--p3r-dark-blue);
+  color: var(--p3r-white);
+}
+
+/* Primary Button - P3R Cyan Action */
+.btn-primary {
+  padding: 0.75rem 2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, var(--p3r-cyan-dark) 0%, var(--p3r-cyan) 100%);
+  color: var(--p3r-dark-blue);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--p3r-cyan) 0%, var(--p3r-cyan-glow) 100%);
+  box-shadow: var(--p3r-glow-cyan-strong);
+  transform: translateY(-2px);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* Filters - P3R Control Panel */
+.filters {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(180deg, rgba(26, 58, 92, 0.3) 0%, rgba(15, 37, 64, 0.4) 100%);
+  border: 1px solid var(--p3r-blue);
+  border-left: 3px solid var(--p3r-cyan);
+  flex-wrap: wrap;
+  animation: slideDown 0.35s ease;
+}
+
+.filters label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--p3r-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filters select {
+  padding: 0.5rem 0.75rem;
+  background: rgba(10, 10, 20, 0.9);
+  border: 1px solid var(--p3r-blue);
+  color: var(--p3r-white);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.filters select:hover {
+  border-color: var(--p3r-cyan-dark);
+}
+
+.filters select:focus {
+  border-color: var(--p3r-cyan);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+  outline: none;
+}
+
+/* Loading & Empty State */
+.loading {
+  text-align: center;
+  color: var(--p3r-cyan);
+  padding: 3rem 2rem;
+  font-size: 1rem;
+  animation: textGlow 2s infinite;
+}
+
+.empty {
+  text-align: center;
+  color: var(--p3r-gray);
+  padding: 4rem 2rem;
+  font-size: 1.125rem;
+  background: linear-gradient(180deg, rgba(15, 37, 64, 0.5) 0%, rgba(13, 26, 45, 0.3) 100%);
+  border: 2px dashed var(--p3r-blue);
+  animation: fadeIn 0.4s ease;
+}
+
+.empty::before {
+  content: '\25C7';
+  display: block;
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--p3r-cyan);
+  animation: textGlow 2s infinite;
+}
+
+/* Habit List */
+.habit-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Habit Item - P3R Card Style */
+.habit-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(15, 37, 64, 0.8) 0%, rgba(13, 26, 45, 0.9) 100%);
+  border: 1px solid var(--p3r-blue);
+  border-left: 4px solid var(--p3r-cyan);
+  margin-bottom: 0.75rem;
+  transition: all 0.25s ease;
+  animation: slideDown 0.35s ease backwards;
+  position: relative;
+}
+
+/* Stagger animation for habit items */
+.habit-item:nth-child(1) { animation-delay: 0.05s; }
+.habit-item:nth-child(2) { animation-delay: 0.1s; }
+.habit-item:nth-child(3) { animation-delay: 0.15s; }
+.habit-item:nth-child(4) { animation-delay: 0.2s; }
+.habit-item:nth-child(5) { animation-delay: 0.25s; }
+
+.habit-item:hover {
+  border-color: var(--p3r-cyan-dark);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.2), inset 0 0 30px rgba(0, 212, 255, 0.05);
+  transform: translateX(5px);
+}
+
+/* Completed Habit */
+.habit-item.completed {
+  border-left-color: var(--p3r-green);
+}
+
+.habit-item.completed .habit-title {
+  color: var(--p3r-green);
+}
+
+/* Inactive Habit */
+.habit-item.inactive {
+  opacity: 0.6;
+  border-left-color: var(--p3r-gray);
+}
+
+.habit-item.inactive .habit-title {
+  color: var(--p3r-gray);
+}
+
+.habit-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+/* Custom Checkbox - P3R Style */
+.habit-content input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: rgba(10, 10, 20, 0.8);
+  border: 2px solid var(--p3r-cyan-dark);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.habit-content input[type="checkbox"]:hover:not(:disabled) {
+  border-color: var(--p3r-cyan);
+  box-shadow: var(--p3r-glow-cyan);
+}
+
+.habit-content input[type="checkbox"]:checked {
+  background: var(--p3r-green);
+  border-color: var(--p3r-green);
+}
+
+.habit-content input[type="checkbox"]:checked::after {
+  content: '\2713';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--p3r-dark-blue);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.habit-content input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.habit-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.habit-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--p3r-white);
+  transition: color 0.2s ease;
+}
+
+.habit-meta {
+  display: flex;
+  gap: 0.625rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Frequency Badges - P3R Style */
+.frequency-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
+}
+
+.frequency-daily {
+  background: linear-gradient(135deg, var(--p3r-cyan) 0%, var(--p3r-cyan-dark) 100%);
+  color: var(--p3r-dark-blue);
+}
+
+.frequency-weekly {
+  background: linear-gradient(135deg, var(--p3r-yellow) 0%, var(--p3r-gold) 100%);
+  color: var(--p3r-dark-blue);
+}
+
+.frequency-monthly {
+  background: linear-gradient(135deg, var(--p3r-teal) 0%, #008080 100%);
+  color: var(--p3r-white);
+}
+
+/* Habit Stats Container */
+.habit-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  margin-right: 1rem;
+}
+
+/* Streak Indicator */
+.streak-tooltip {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.streak-indicator {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f7931e;
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid rgba(255, 107, 53, 0.5);
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.streak-tooltip:hover .streak-indicator {
+  background: rgba(255, 107, 53, 0.2);
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+}
+
+.streak-tooltip .tooltip-content {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  padding: 0.5rem 0.75rem;
+  background: var(--p3r-midnight);
+  border: 1px solid #f7931e;
+  color: var(--p3r-white);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 107, 53, 0.2);
+}
+
+.streak-tooltip .tooltip-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #f7931e;
+}
+
+.streak-tooltip:hover .tooltip-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.inactive-badge {
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--p3r-gray);
+  color: var(--p3r-dark-blue);
+  margin-left: 0.5rem;
+}
+
+/* Habit Actions */
+.habit-actions {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.habit-item:hover .habit-actions {
+  opacity: 1;
+}
+
+.btn-edit, .btn-delete, .btn-save, .btn-cancel {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-edit {
+  background: transparent;
+  color: var(--p3r-yellow);
+  border: 1px solid var(--p3r-yellow);
+}
+
+.btn-edit:hover {
+  background: var(--p3r-yellow);
+  color: var(--p3r-dark-blue);
+  box-shadow: var(--p3r-glow-yellow);
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background: transparent;
+  color: var(--p3r-red);
+  border: 1px solid var(--p3r-red);
+}
+
+.btn-delete:hover {
+  background: var(--p3r-red);
+  color: var(--p3r-white);
+  box-shadow: var(--p3r-glow-red);
+  transform: translateY(-2px);
+}
+
+.btn-save {
+  background: linear-gradient(135deg, var(--p3r-green) 0%, #00cc6a 100%);
+  color: var(--p3r-dark-blue);
+  border: none;
+}
+
+.btn-save:hover {
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+  transform: translateY(-2px);
+}
+
+.btn-cancel {
+  background: transparent;
+  color: var(--p3r-gray);
+  border: 1px solid var(--p3r-gray);
+}
+
+.btn-cancel:hover {
+  background: var(--p3r-gray);
+  color: var(--p3r-dark-blue);
+  transform: translateY(-2px);
+}
+
+/* Button active states */
+.btn-edit:active,
+.btn-delete:active,
+.btn-save:active,
+.btn-cancel:active {
+  transform: scale(0.95);
+}
+
+/* Edit Form */
+.edit-form {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  flex-wrap: wrap;
+  animation: scaleIn 0.2s ease;
+}
+
+.edit-form .edit-title {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.625rem 0.875rem;
+  font-size: 1rem;
+  background: rgba(10, 10, 20, 0.9);
+  border: 2px solid var(--p3r-cyan);
+  color: var(--p3r-white);
+  outline: none;
+  box-shadow: var(--p3r-glow-cyan);
+}
+
+.edit-form select {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  background: rgba(10, 10, 20, 0.9);
+  border: 2px solid var(--p3r-blue);
+  color: var(--p3r-white);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.edit-form select:focus {
+  border-color: var(--p3r-cyan);
+}
+
+/* Stats Footer - P3R Data Panel */
+.stats {
+  margin-top: 2rem;
+  text-align: center;
+  color: var(--p3r-white);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(180deg, rgba(26, 58, 92, 0.4) 0%, rgba(15, 37, 64, 0.5) 100%);
+  border: 1px solid var(--p3r-blue);
+  border-top: 3px solid var(--p3r-cyan);
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  animation: fadeIn 0.4s ease 0.3s backwards;
+  position: relative;
+}
+
+.stats::before {
+  content: 'STATUS';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--p3r-midnight);
+  color: var(--p3r-cyan);
+  padding: 0.25rem 1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  border: 1px solid var(--p3r-cyan-dark);
+}
+
+.stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.8rem;
+}
+
+.stats .count {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--p3r-cyan);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+.stats .count.completed {
+  color: var(--p3r-green);
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.stats .count.pending {
+  color: var(--p3r-yellow);
+  text-shadow: 0 0 10px rgba(255, 217, 61, 0.5);
+}
+
+.stats .datetime {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--p3r-cyan);
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+  padding-right: 1.5rem;
+  border-right: 1px solid var(--p3r-blue);
+  margin-right: 0.5rem;
+}
+
+/* Completion Rate Tooltip */
+.habit-tooltip {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.completion-rate {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--p3r-cyan);
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid var(--p3r-cyan-dark);
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.habit-tooltip:hover .completion-rate {
+  background: rgba(0, 212, 255, 0.2);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.tooltip-content {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  padding: 0.5rem 0.75rem;
+  background: var(--p3r-midnight);
+  border: 1px solid var(--p3r-cyan);
+  color: var(--p3r-white);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+.tooltip-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--p3r-cyan);
+}
+
+.habit-tooltip:hover .tooltip-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .habit-container {
+    padding: 0.5rem;
+  }
+
+  .add-habit-form {
+    padding: 1.25rem;
+  }
+
+  .habit-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .habit-actions {
+    width: 100%;
+    justify-content: flex-end;
+    opacity: 1;
+  }
+
+  .filters {
+    gap: 0.75rem;
+    padding: 0.875rem;
+  }
+
+  .filters label {
+    flex: 1;
+    min-width: 120px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .filters select {
+    width: 100%;
+  }
+
+  .stats {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}

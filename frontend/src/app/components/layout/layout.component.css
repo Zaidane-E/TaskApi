@@ -77,7 +77,43 @@
   text-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
 }
 
-/* Navigation */
+/* Main Navigation Tabs */
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  color: var(--p3r-gray);
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: 2px solid transparent;
+  transition: all 0.25s ease;
+}
+
+.nav-tab:hover {
+  color: var(--p3r-cyan);
+  border-bottom-color: var(--p3r-cyan-dark);
+}
+
+.nav-tab.active {
+  color: var(--p3r-cyan);
+  background: linear-gradient(180deg, rgba(0, 212, 255, 0.1) 0%, transparent 100%);
+  border-bottom-color: var(--p3r-cyan);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+/* User Navigation */
 .nav {
   display: flex;
   align-items: center;
@@ -205,6 +241,10 @@
   }
 
   .user-email {
+    display: none;
+  }
+
+  .main-nav {
     display: none;
   }
 }

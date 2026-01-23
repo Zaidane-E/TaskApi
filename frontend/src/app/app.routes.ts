@@ -24,6 +24,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'habits',
+    loadComponent: () => import('./components/habit-list/habit-list.component').then(m => m.HabitListComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: '**',
     redirectTo: '/tasks'
   }

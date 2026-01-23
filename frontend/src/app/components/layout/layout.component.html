@@ -2,8 +2,14 @@
   <header class="header">
     <div class="header-content">
       <h1 class="logo">
-        <a routerLink="/tasks">My TODO List</a>
+        <a routerLink="/tasks">TaskTracker</a>
       </h1>
+      @if (authService.isAuthenticated() || authService.isGuest()) {
+        <nav class="main-nav">
+          <a routerLink="/tasks" routerLinkActive="active" class="nav-tab">Tasks</a>
+          <a routerLink="/habits" routerLinkActive="active" class="nav-tab">Habits</a>
+        </nav>
+      }
       <nav class="nav">
         @if (authService.isAuthenticated()) {
           <span class="user-email">{{ authService.user()?.email }}</span>

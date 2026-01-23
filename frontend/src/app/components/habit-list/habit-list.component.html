@@ -1,0 +1,123 @@
+<div class="habit-container">
+  @if (isGuest()) {
+    <div class="guest-banner">
+      You're in guest mode. <a routerLink="/register">Register</a> to save your habits permanently.
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error">
+      {{ error() }}
+      <button class="btn-close" (click)="error.set(null)">x</button>
+    </div>
+  }
+
+  <!-- Daily Progress Bar -->
+  <div class="progress-section">
+    <div class="progress-header">
+      <span class="progress-label">TODAY'S PROGRESS</span>
+      <span class="progress-text">{{ completedTodayCount() }} / {{ totalActiveCount() }}</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="progressPercent()"></div>
+    </div>
+    <div class="progress-percent">{{ progressPercent() }}%</div>
+  </div>
+
+  <div class="add-habit-form">
+    <div class="form-row">
+      <input
+        type="text"
+        class="title-input"
+        placeholder="Enter a new daily habit..."
+        [ngModel]="newHabitTitle()"
+        (ngModelChange)="newHabitTitle.set($event)"
+        (keyup.enter)="addHabit()"
+      />
+      <button class="btn-primary" (click)="addHabit()">Add Habit</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <label>
+      Status:
+      <select
+        [ngModel]="filterActive()"
+        (ngModelChange)="filterActive.set($event); applyFilters()"
+      >
+        <option value="all">All</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </label>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading habits...</div>
+  } @else {
+    @if (habits().length === 0) {
+      <div class="empty">No habits found. Add your first habit above!</div>
+    } @else {
+      <ul class="habit-list">
+        @for (habit of habits(); track habit.id) {
+          <li class="habit-item"
+              [class.completed]="habit.isCompletedToday"
+              [class.inactive]="!habit.isActive">
+            @if (editingHabit()?.id === habit.id) {
+              <div class="edit-form">
+                <input
+                  type="text"
+                  class="edit-title"
+                  [ngModel]="editTitle()"
+                  (ngModelChange)="editTitle.set($event)"
+                  (keyup.enter)="saveEdit()"
+                  (keyup.escape)="cancelEdit()"
+                />
+                <button class="btn-save" (click)="saveEdit()">Save</button>
+                <button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+              </div>
+            } @else {
+              <div class="habit-content">
+                <input
+                  type="checkbox"
+                  [checked]="habit.isCompletedToday"
+                  (change)="toggleComplete(habit)"
+                  [disabled]="!habit.isActive"
+                />
+                <div class="habit-info">
+                  <span class="habit-title">{{ habit.title }}</span>
+                  @if (!habit.isActive) {
+                    <span class="inactive-badge">Inactive</span>
+                  }
+                </div>
+                <div class="habit-stats">
+                  @if (habit.isCompletedToday && habit.currentStreak > 0) {
+                    <div class="streak-tooltip">
+                      <span class="streak-indicator">{{ habit.currentStreak }}x</span>
+                      <div class="tooltip-content">Current streak</div>
+                    </div>
+                  }
+                  <div class="habit-tooltip">
+                    <span class="completion-rate">{{ habit.completionRate }}%</span>
+                    <div class="tooltip-content">All-time completion rate</div>
+                  </div>
+                </div>
+              </div>
+              <div class="habit-actions">
+                <button class="btn-edit" (click)="startEdit(habit)">Edit</button>
+                <button class="btn-delete" (click)="deleteHabit(habit.id)">Delete</button>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    }
+  }
+
+  <div class="stats">
+    <span class="datetime">{{ currentDateTime() }}</span>
+    <span>Active: <span class="count">{{ totalActiveCount() }}</span></span>
+    <span>Completed: <span class="count completed">{{ completedTodayCount() }}</span></span>
+    <span>Pending: <span class="count pending">{{ pendingCount() }}</span></span>
+  </div>
+</div>
