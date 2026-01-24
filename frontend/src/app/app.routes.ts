@@ -5,8 +5,13 @@ import { guestGuard } from './guards/guest.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/tasks',
+    redirectTo: '/dashboard',
     pathMatch: 'full'
+  },
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
+    canActivate: [authGuard]
   },
   {
     path: 'login',
@@ -40,6 +45,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: '/tasks'
+    redirectTo: '/dashboard'
   }
 ];

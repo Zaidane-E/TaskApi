@@ -6,6 +6,7 @@
       </h1>
       @if (authService.isAuthenticated() || authService.isGuest()) {
         <nav class="main-nav">
+          <a routerLink="/dashboard" routerLinkActive="active" class="nav-tab">Dashboard</a>
           <a routerLink="/tasks" routerLinkActive="active" class="nav-tab">Tasks</a>
           <a routerLink="/habits" routerLinkActive="active" class="nav-tab">Habits</a>
         </nav>

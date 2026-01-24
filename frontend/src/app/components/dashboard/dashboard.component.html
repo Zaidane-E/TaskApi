@@ -1,0 +1,162 @@
+<div class="dashboard-container">
+  @if (isGuest()) {
+    <div class="guest-banner">
+      You're in guest mode. <a routerLink="/register">Register</a> to save your data permanently.
+    </div>
+  }
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Dashboard</h1>
+    <span class="datetime">{{ currentDateTime() }}</span>
+  </div>
+
+  <!-- Weekly Overview -->
+  <div class="section week-section">
+    <div class="section-header">
+      <h2 class="section-title">This Week</h2>
+    </div>
+    <div class="week-grid">
+      @for (day of weekDays(); track day.dateStr) {
+        <div class="day-card" [class.today]="day.isToday" [class.future]="day.date > today">
+          <div class="day-header">
+            <span class="day-name">{{ day.dayName }}</span>
+            <span class="day-num">{{ day.dayNum }}</span>
+          </div>
+          <div class="day-stats">
+            <div class="stat-ring" [class]="getCompletionColor(day.habitCompletion)">
+              <span class="ring-value">{{ day.habitCompletion }}%</span>
+            </div>
+            <div class="stat-details">
+              <span class="stat-line habits">
+                <span class="stat-icon">H</span>
+                {{ day.habitsCompleted }}/{{ day.habitsTotal }}
+              </span>
+              <span class="stat-line tasks">
+                <span class="stat-icon">T</span>
+                {{ day.tasksCompleted }}/{{ day.tasksTotal }}
+              </span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <!-- Today's Habits -->
+    <div class="section habits-section">
+      <div class="section-header">
+        <h2 class="section-title">Today's Habits</h2>
+        <a routerLink="/habits" class="section-link">View All</a>
+      </div>
+      <div class="progress-bar-mini">
+        <div class="progress-fill-mini" [style.width.%]="habitsProgressPercent()"></div>
+        <div class="goal-marker-mini" [style.left.%]="accountabilitySettings().goalPercentage"></div>
+      </div>
+      <div class="progress-stats">
+        <span>{{ habitsCompletedToday() }}/{{ todaysHabits().length }} completed</span>
+        <span class="goal-text" [class.met]="goalMet()" [class.missed]="!goalMet()">
+          Goal: {{ accountabilitySettings().goalPercentage }}%
+        </span>
+      </div>
+      <ul class="compact-list">
+        @for (habit of todaysHabits(); track habit.id) {
+          <li class="compact-item" [class.completed]="habit.isCompletedToday">
+            <input
+              type="checkbox"
+              [checked]="habit.isCompletedToday"
+              (change)="toggleHabit(habit)"
+            />
+            <span class="item-title">{{ habit.title }}</span>
+            @if (habit.currentStreak > 0 && habit.isCompletedToday) {
+              <span class="streak-badge">{{ habit.currentStreak }}x</span>
+            }
+          </li>
+        }
+        @if (todaysHabits().length === 0) {
+          <li class="empty-item">No active habits</li>
+        }
+      </ul>
+    </div>
+
+    <!-- Pending Tasks -->
+    <div class="section tasks-section">
+      <div class="section-header">
+        <h2 class="section-title">Pending Tasks</h2>
+        <a routerLink="/tasks" class="section-link">View All</a>
+      </div>
+      <div class="task-summary">
+        <span class="summary-item">
+          <span class="summary-count pending">{{ totalPendingTasks() }}</span> pending
+        </span>
+        @if (totalOverdueTasks() > 0) {
+          <span class="summary-item overdue">
+            <span class="summary-count overdue">{{ totalOverdueTasks() }}</span> overdue
+          </span>
+        }
+      </div>
+      <ul class="compact-list">
+        @for (task of todaysTasks(); track task.id) {
+          <li class="compact-item" [class.completed]="task.isCompleted" [class.overdue]="task.isOverdue && !task.isCompleted">
+            <input
+              type="checkbox"
+              [checked]="task.isCompleted"
+              (change)="toggleTask(task)"
+            />
+            <span class="item-title">{{ task.title }}</span>
+            @if (task.dueDate) {
+              <span class="due-date-badge" [class.overdue]="task.isOverdue">{{ formatDate(task.dueDate) }}</span>
+            }
+            <span class="priority-dot" [class]="'priority-' + task.priority.toLowerCase()"></span>
+          </li>
+        }
+        @if (todaysTasks().length === 0) {
+          <li class="empty-item">No pending tasks</li>
+        }
+      </ul>
+    </div>
+
+    <!-- Accountability Status -->
+    <div class="section accountability-section">
+      <div class="section-header">
+        <h2 class="section-title">Accountability</h2>
+        <a routerLink="/habits/accountability" class="section-link">Manage</a>
+      </div>
+      <div class="accountability-status" [class.goal-met]="goalMet()" [class.goal-missed]="!goalMet()">
+        <div class="status-indicator">
+          <span class="status-icon">{{ goalMet() ? 'Y' : 'X' }}</span>
+          <span class="status-text">{{ goalMet() ? 'Goal Met!' : 'Goal Not Met' }}</span>
+        </div>
+        <div class="status-progress">
+          <span class="current-rate">{{ habitsProgressPercent() }}%</span>
+          <span class="target-rate">/ {{ accountabilitySettings().goalPercentage }}%</span>
+        </div>
+      </div>
+
+      <div class="accountability-actions">
+        @if (!goalMet() && accountabilitySettings().penalties.length > 0) {
+          <div class="action-card penalty">
+            <span class="action-label">Penalty</span>
+            <span class="action-count">{{ accountabilitySettings().penalties.length }} defined</span>
+            @if (todayLog()?.penaltyApplied) {
+              <span class="action-status applied">Applied</span>
+            }
+          </div>
+        }
+        @if (goalMet() && accountabilitySettings().rewards.length > 0) {
+          <div class="action-card reward">
+            <span class="action-label">Reward</span>
+            <span class="action-count">{{ accountabilitySettings().rewards.length }} available</span>
+            @if (todayLog()?.rewardClaimed) {
+              <span class="action-status claimed">Claimed</span>
+            }
+          </div>
+        }
+        @if (accountabilitySettings().penalties.length === 0 && accountabilitySettings().rewards.length === 0) {
+          <div class="empty-actions">
+            <span>No penalties or rewards set up yet.</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

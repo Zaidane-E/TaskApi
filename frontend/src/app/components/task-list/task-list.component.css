@@ -7,6 +7,41 @@
   animation: fadeIn 0.4s ease;
 }
 
+/* Navigation Tabs */
+.nav-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  background: linear-gradient(180deg, rgba(15, 37, 64, 0.5) 0%, rgba(13, 26, 45, 0.3) 100%);
+  border: 1px solid var(--p3r-blue);
+}
+
+.tab-link {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  color: var(--p3r-gray);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.25s ease;
+}
+
+.tab-link:hover {
+  color: var(--p3r-cyan);
+  border-color: var(--p3r-cyan-dark);
+}
+
+.tab-link.active {
+  color: var(--p3r-cyan);
+  background: rgba(0, 212, 255, 0.1);
+  border-color: var(--p3r-cyan);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
 /* Guest Banner - P3R Warning Style */
 .guest-banner {
   background: linear-gradient(135deg, rgba(255, 217, 61, 0.15) 0%, rgba(255, 190, 11, 0.1) 100%);
