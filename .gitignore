@@ -1,5 +1,3 @@
-# TEMPLATE.GITIGNORE
-
 # .NET
 bin/
 obj/
@@ -10,6 +8,12 @@ obj/
 *.dll
 *.pdb
 *.log
+*.nupkg
+publish/
+out/
+
+# .NET User Secrets
+secrets.json
 
 # SQLite database
 *.db
@@ -19,6 +23,9 @@ obj/
 # Visual Studio
 .vs/
 *.csproj.user
+*.rsuser
+*.sln.docstates
+launchSettings.json
 
 # Angular / Node
 node_modules/
@@ -26,6 +33,8 @@ dist/
 .angular/
 npm-debug.log
 yarn-error.log
+.npm/
+.yarn/
 
 # IDE
 .idea/
@@ -37,8 +46,18 @@ yarn-error.log
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
+ehthumbs.db
 
-# Environment files
+# Environment and secrets
 .env
-.env.local
-backend/TaskAPI/appsettings.Development.json
+.env.*
+!.env.example
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.local.json
+**/appsettings.Development.json
+**/appsettings.Local.json
+
+# Claude Code
+.claude/
