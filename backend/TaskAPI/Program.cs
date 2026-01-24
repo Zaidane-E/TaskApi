@@ -40,17 +40,10 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddControllers();
 
-// Database configuration - SQLite for development, SQL Server for production
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-}
-else
-{
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("AzureConnection")));
-}
+// Database configuration - PostgreSQL for development, SQL Server for production
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
