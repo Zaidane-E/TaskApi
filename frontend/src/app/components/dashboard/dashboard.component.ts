@@ -95,6 +95,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private loadWeekData(): void {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const todayStr = this.getLocalDateString(today);
 
     // Get start of week (Sunday)
     const startOfWeek = new Date(today);
@@ -106,38 +107,44 @@ export class DashboardComponent implements OnInit, OnDestroy {
     for (let i = 0; i < 7; i++) {
       const date = new Date(startOfWeek);
       date.setDate(startOfWeek.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = this.getLocalDateString(date);
 
       // Get habit completion for this day
-      const habitStats = this.getHabitCompletionForDate(dateStr);
-      const taskStats = this.getTaskCompletionForDate(dateStr);
+      const habitStats = this.getHabitCompletionForDate(dateStr, todayStr);
+      const tasksCompleted = this.getTasksCompletedForDate(dateStr);
 
       days.push({
         date,
         dateStr,
         dayName: dayNames[i],
         dayNum: date.getDate(),
-        isToday: dateStr === today.toISOString().split('T')[0],
+        isToday: dateStr === todayStr,
         habitCompletion: habitStats.percentage,
         habitsCompleted: habitStats.completed,
         habitsTotal: habitStats.total,
-        tasksCompleted: taskStats.completed,
-        tasksTotal: taskStats.total
+        tasksCompleted: tasksCompleted,
+        tasksTotal: 0 // Not used anymore
       });
     }
 
     this.weekDays.set(days);
   }
 
-  private getHabitCompletionForDate(dateStr: string): { completed: number; total: number; percentage: number } {
+  private getLocalDateString(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private getHabitCompletionForDate(dateStr: string, todayStr: string): { completed: number; total: number; percentage: number } {
     const habits = this.guestHabitService.getHabits().filter(h => h.isActive);
     const total = habits.length;
 
     if (total === 0) return { completed: 0, total: 0, percentage: 0 };
 
     // For today, use current completion status
-    const today = new Date().toISOString().split('T')[0];
-    if (dateStr === today) {
+    if (dateStr === todayStr) {
       const completed = habits.filter(h => h.isCompletedToday).length;
       return { completed, total, percentage: Math.round((completed / total) * 100) };
     }
@@ -154,18 +161,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return { completed, total, percentage: Math.round((completed / total) * 100) };
   }
 
-  private getTaskCompletionForDate(dateStr: string): { completed: number; total: number } {
+  private getTasksCompletedForDate(dateStr: string): number {
     const tasks = this.guestTaskService.getTasks();
 
-    // Tasks due on this date or completed on this date
-    const relevantTasks = tasks.filter(t => {
-      const dueDate = t.dueDate ? t.dueDate.split('T')[0] : null;
-      const completedDate = t.completedAt ? t.completedAt.split('T')[0] : null;
-      return dueDate === dateStr || completedDate === dateStr;
-    });
-
-    const completed = relevantTasks.filter(t => t.isCompleted).length;
-    return { completed, total: relevantTasks.length };
+    // Count tasks completed on this date
+    return tasks.filter(t => {
+      if (!t.completedAt) return false;
+      const completedDate = t.completedAt.split('T')[0];
+      return completedDate === dateStr;
+    }).length;
   }
 
   private loadTodaysData(): void {

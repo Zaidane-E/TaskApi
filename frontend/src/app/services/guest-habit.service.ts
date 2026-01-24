@@ -46,6 +46,13 @@ export class GuestHabitService {
     this.initializeIds();
   }
 
+  private getLocalDateString(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   private initializeIds(): void {
     const habits = this.loadHabits();
     const completions = this.loadCompletions();
@@ -77,7 +84,7 @@ export class GuestHabitService {
 
   private mapToHabit(stored: StoredHabit): Habit {
     const completions = this.loadCompletions().filter(c => c.habitId === stored.id);
-    const today = new Date().toISOString().split('T')[0];
+    const today = this.getLocalDateString(new Date());
 
     const createdDate = new Date(stored.createdAt);
     const todayDate = new Date();
@@ -107,7 +114,7 @@ export class GuestHabitService {
     if (completions.length === 0) return 0;
 
     const dates = [...new Set(completions.map(c => c.completedDate))].sort().reverse();
-    const today = new Date().toISOString().split('T')[0];
+    const today = this.getLocalDateString(new Date());
     let streak = 0;
     let expectedDate = today;
 
@@ -116,15 +123,15 @@ export class GuestHabitService {
         streak++;
         const d = new Date(expectedDate);
         d.setDate(d.getDate() - 1);
-        expectedDate = d.toISOString().split('T')[0];
+        expectedDate = this.getLocalDateString(d);
       } else if (streak === 0) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        if (date === yesterday.toISOString().split('T')[0]) {
+        if (date === this.getLocalDateString(yesterday)) {
           streak++;
           const d = new Date(date);
           d.setDate(d.getDate() - 1);
-          expectedDate = d.toISOString().split('T')[0];
+          expectedDate = this.getLocalDateString(d);
         } else {
           break;
         }
@@ -223,7 +230,7 @@ export class GuestHabitService {
 
     const completions = this.loadCompletions();
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
+    const today = this.getLocalDateString(now);
 
     if (completions.some(c => c.habitId === id && c.completedDate === today)) {
       return null;
@@ -246,7 +253,7 @@ export class GuestHabitService {
     if (!habit) return null;
 
     const completions = this.loadCompletions();
-    const today = new Date().toISOString().split('T')[0];
+    const today = this.getLocalDateString(new Date());
 
     const completionIndex = completions.findIndex(c => c.habitId === id && c.completedDate === today);
     if (completionIndex === -1) return null;
@@ -272,7 +279,7 @@ export class GuestHabitService {
   getCompletions(id: number, days: number = 30): HabitCompletion[] {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
-    const startDateStr = startDate.toISOString().split('T')[0];
+    const startDateStr = this.getLocalDateString(startDate);
 
     return this.loadCompletions()
       .filter(c => c.habitId === id && c.completedDate >= startDateStr)
@@ -296,13 +303,13 @@ export class GuestHabitService {
 
     const completionDates = new Set(
       completions
-        .filter(c => c.completedDate >= startDate.toISOString().split('T')[0])
+        .filter(c => c.completedDate >= this.getLocalDateString(startDate))
         .map(c => c.completedDate)
     );
 
     const history: DailyCompletion[] = [];
     for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0];
+      const dateStr = this.getLocalDateString(d);
       history.push({
         date: dateStr,
         completed: completionDates.has(dateStr)
@@ -404,7 +411,7 @@ export class GuestHabitService {
 
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
-    const startDateStr = startDate.toISOString().split('T')[0];
+    const startDateStr = this.getLocalDateString(startDate);
 
     return logs
       .filter(l => l.date >= startDateStr)
@@ -416,13 +423,13 @@ export class GuestHabitService {
   }
 
   getTodayLog(): AccountabilityLog | null {
-    const today = new Date().toISOString().split('T')[0];
+    const today = this.getLocalDateString(new Date());
     const logs = this.getAccountabilityLog(1);
     return logs.find(l => l.date === today) || null;
   }
 
   logAccountability(completionRate: number, goalMet: boolean): AccountabilityLog {
-    const today = new Date().toISOString().split('T')[0];
+    const today = this.getLocalDateString(new Date());
     const json = localStorage.getItem(this.ACCOUNTABILITY_LOG_KEY);
     const logs: AccountabilityLog[] = json ? JSON.parse(json) : [];
 
@@ -449,7 +456,7 @@ export class GuestHabitService {
   }
 
   applyPenalty(penaltyId: number): void {
-    const today = new Date().toISOString().split('T')[0];
+    const today = this.getLocalDateString(new Date());
     const json = localStorage.getItem(this.ACCOUNTABILITY_LOG_KEY);
     const logs: AccountabilityLog[] = json ? JSON.parse(json) : [];
 
@@ -462,7 +469,7 @@ export class GuestHabitService {
   }
 
   claimReward(rewardId: number): void {
-    const today = new Date().toISOString().split('T')[0];
+    const today = this.getLocalDateString(new Date());
     const json = localStorage.getItem(this.ACCOUNTABILITY_LOG_KEY);
     const logs: AccountabilityLog[] = json ? JSON.parse(json) : [];
 
@@ -475,7 +482,7 @@ export class GuestHabitService {
   }
 
   cancelPenalty(): void {
-    const today = new Date().toISOString().split('T')[0];
+    const today = this.getLocalDateString(new Date());
     const json = localStorage.getItem(this.ACCOUNTABILITY_LOG_KEY);
     const logs: AccountabilityLog[] = json ? JSON.parse(json) : [];
 
@@ -488,7 +495,7 @@ export class GuestHabitService {
   }
 
   cancelReward(): void {
-    const today = new Date().toISOString().split('T')[0];
+    const today = this.getLocalDateString(new Date());
     const json = localStorage.getItem(this.ACCOUNTABILITY_LOG_KEY);
     const logs: AccountabilityLog[] = json ? JSON.parse(json) : [];
 
