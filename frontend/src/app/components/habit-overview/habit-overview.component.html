@@ -1,0 +1,148 @@
+<div class="overview-container">
+  @if (isGuest()) {
+    <div class="guest-banner">
+      You're in guest mode. <a routerLink="/register">Register</a> to save your habits permanently.
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error">
+      {{ error() }}
+      <button class="btn-close" (click)="error.set(null)">x</button>
+    </div>
+  }
+
+  <div class="nav-tabs">
+    <a routerLink="/habits" class="tab-link">Habits</a>
+    <a routerLink="/habits/overview" class="tab-link active">Overview</a>
+    <a routerLink="/habits/accountability" class="tab-link">Accountability</a>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading overview data...</div>
+  } @else {
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Completions</div>
+        <div class="stat-value">{{ totalCompletions() }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Longest Streak</div>
+        <div class="stat-value streak">{{ longestStreak() }} <span class="stat-unit">days</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Current Best Streak</div>
+        <div class="stat-value current">{{ currentStreakBest() }} <span class="stat-unit">days</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Overall Completion Rate</div>
+        <div class="stat-value rate">{{ overallCompletionRate() }}%</div>
+      </div>
+    </div>
+
+    <!-- Calendar Section -->
+    <div class="calendar-section">
+      <div class="section-header">
+        <h2 class="section-title">Daily Completion</h2>
+        <div class="month-nav">
+          <button class="nav-btn" (click)="previousMonth()">&lt;</button>
+          <span class="month-label">{{ getMonthName() }}</span>
+          <button class="nav-btn" (click)="nextMonth()">&gt;</button>
+        </div>
+      </div>
+
+      <div class="calendar">
+        <div class="calendar-header">
+          @for (day of weekDays; track day) {
+            <div class="weekday">{{ day }}</div>
+          }
+        </div>
+        <div class="calendar-grid">
+          @for (day of calendarDays(); track day.date.toISOString()) {
+            <div class="calendar-day"
+                 [class.other-month]="!day.isCurrentMonth"
+                 [class.today]="day.isToday"
+                 [class]="getCompletionClass(day.percentage)">
+              <span class="day-number">{{ day.date.getDate() }}</span>
+              @if (day.totalHabits > 0) {
+                <span class="day-percentage">{{ day.percentage }}%</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="legend">
+        <span class="legend-label">Completion:</span>
+        <div class="legend-item"><span class="legend-color completion-none"></span>0%</div>
+        <div class="legend-item"><span class="legend-color completion-low"></span>1-24%</div>
+        <div class="legend-item"><span class="legend-color completion-medium-low"></span>25-49%</div>
+        <div class="legend-item"><span class="legend-color completion-medium"></span>50-74%</div>
+        <div class="legend-item"><span class="legend-color completion-high"></span>75-99%</div>
+        <div class="legend-item"><span class="legend-color completion-perfect"></span>100%</div>
+      </div>
+    </div>
+
+    <!-- Monthly Stats Section -->
+    <div class="monthly-section">
+      <div class="section-header">
+        <h2 class="section-title">Monthly Breakdown</h2>
+        <div class="year-nav">
+          <button class="nav-btn" (click)="previousYear()">&lt;</button>
+          <span class="year-label">{{ selectedYear() }}</span>
+          <button class="nav-btn" (click)="nextYear()">&gt;</button>
+        </div>
+      </div>
+
+      <div class="monthly-grid">
+        @for (month of monthlyStats(); track month.month) {
+          <div class="month-card" [class]="getCompletionClass(month.percentage)">
+            <div class="month-name">{{ month.name }}</div>
+            <div class="month-percentage">{{ month.percentage }}%</div>
+            <div class="month-details">{{ month.completedCount }}/{{ month.totalPossible }}</div>
+          </div>
+        }
+      </div>
+
+      <!-- Yearly Total -->
+      <div class="yearly-summary">
+        <div class="yearly-label">{{ selectedYear() }} Total</div>
+        <div class="yearly-stats">
+          <span class="yearly-completed">{{ yearlyStats().completed }}</span>
+          <span class="yearly-divider">/</span>
+          <span class="yearly-total">{{ yearlyStats().total }}</span>
+          <span class="yearly-percentage">({{ yearlyStats().percentage }}%)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Per-Habit Stats -->
+    @if (habits().length > 0) {
+      <div class="habits-section">
+        <h2 class="section-title">Habit Performance</h2>
+        <div class="habits-table">
+          @for (habit of habits(); track habit.id) {
+            <div class="habit-row">
+              <div class="habit-name">{{ habit.title }}</div>
+              <div class="habit-stats-row">
+                <div class="habit-stat">
+                  <span class="habit-stat-label">Streak</span>
+                  <span class="habit-stat-value">{{ habit.currentStreak }}</span>
+                </div>
+                <div class="habit-stat">
+                  <span class="habit-stat-label">Total</span>
+                  <span class="habit-stat-value">{{ habit.totalCompletions }}</span>
+                </div>
+                <div class="habit-stat">
+                  <span class="habit-stat-label">Rate</span>
+                  <span class="habit-stat-value">{{ habit.completionRate }}%</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>
