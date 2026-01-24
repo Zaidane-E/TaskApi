@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { HabitService } from '../../services/habit.service';
 import { GuestHabitService } from '../../services/guest-habit.service';
-import { Habit, HabitFilter, CreateHabit, UpdateHabit } from '../../models/habit.model';
+import { Habit, HabitSortOption, CreateHabit, UpdateHabit } from '../../models/habit.model';
 
 @Component({
   selector: 'app-habit-list',
@@ -27,7 +27,8 @@ export class HabitListComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
   currentDateTime = signal('');
 
-  filterActive = signal<string>('all');
+  sortBy = signal<HabitSortOption>('default');
+  sortAscending = signal<boolean>(false);
 
   completedTodayCount = computed(() => this.habits().filter(h => h.isCompletedToday && h.isActive).length);
   pendingCount = computed(() => this.habits().filter(h => !h.isCompletedToday && h.isActive).length);
@@ -36,6 +37,10 @@ export class HabitListComponent implements OnInit, OnDestroy {
     const total = this.totalActiveCount();
     if (total === 0) return 0;
     return Math.round((this.completedTodayCount() / total) * 100);
+  });
+
+  goalPercentage = computed(() => {
+    return this.guestHabitService.getAccountabilitySettings().goalPercentage;
   });
 
   isGuest = this.authService.isGuest;
@@ -62,27 +67,43 @@ export class HabitListComponent implements OnInit, OnDestroy {
     this.currentDateTime.set(`${day} ${month} ${date} ${hours}:${minutes}`);
   }
 
-  private buildFilter(): HabitFilter {
-    const filter: HabitFilter = {};
-    if (this.filterActive() !== 'all') {
-      filter.isActive = this.filterActive() === 'active';
+  private sortHabits(habits: Habit[]): Habit[] {
+    const sortOption = this.sortBy();
+    const ascending = this.sortAscending();
+    const direction = ascending ? 1 : -1;
+
+    switch (sortOption) {
+      case 'completionRate':
+        return [...habits].sort((a, b) => (a.completionRate - b.completionRate) * direction);
+      case 'streak':
+        return [...habits].sort((a, b) => (a.currentStreak - b.currentStreak) * direction);
+      case 'completionStatus':
+        return [...habits].sort((a, b) => {
+          if (a.isCompletedToday === b.isCompletedToday) return 0;
+          return (a.isCompletedToday ? 1 : -1) * direction;
+        });
+      default:
+        return habits;
     }
-    return filter;
+  }
+
+  toggleSortDirection(): void {
+    this.sortAscending.update(v => !v);
+    this.applySort();
   }
 
   loadHabits(): void {
     this.loading.set(true);
     this.error.set(null);
-    const filter = this.buildFilter();
 
     if (this.authService.isGuest()) {
-      const habits = this.guestHabitService.getHabits(filter);
-      this.habits.set(habits);
+      const habits = this.guestHabitService.getHabits();
+      this.habits.set(this.sortHabits(habits));
       this.loading.set(false);
     } else {
-      this.habitService.getHabits(filter).subscribe({
+      this.habitService.getHabits().subscribe({
         next: (habits) => {
-          this.habits.set(habits);
+          this.habits.set(this.sortHabits(habits));
           this.loading.set(false);
         },
         error: (err) => {
@@ -210,7 +231,7 @@ export class HabitListComponent implements OnInit, OnDestroy {
     }
   }
 
-  applyFilters(): void {
+  applySort(): void {
     this.loadHabits();
   }
 

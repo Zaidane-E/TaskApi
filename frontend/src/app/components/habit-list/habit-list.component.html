@@ -12,6 +12,12 @@
     </div>
   }
 
+  <div class="nav-tabs">
+    <a routerLink="/habits" class="tab-link active">Habits</a>
+    <a routerLink="/habits/overview" class="tab-link">Overview</a>
+    <a routerLink="/habits/accountability" class="tab-link">Accountability</a>
+  </div>
+
   <!-- Daily Progress Bar -->
   <div class="progress-section">
     <div class="progress-header">
@@ -20,6 +26,9 @@
     </div>
     <div class="progress-bar">
       <div class="progress-fill" [style.width.%]="progressPercent()"></div>
+      <div class="goal-marker" [style.left.%]="goalPercentage()">
+        <span class="goal-marker-label">{{ goalPercentage() }}%</span>
+      </div>
     </div>
     <div class="progress-percent">{{ progressPercent() }}%</div>
   </div>
@@ -40,16 +49,22 @@
 
   <div class="filters">
     <label>
-      Status:
+      Sort by:
       <select
-        [ngModel]="filterActive()"
-        (ngModelChange)="filterActive.set($event); applyFilters()"
+        [ngModel]="sortBy()"
+        (ngModelChange)="sortBy.set($event); applySort()"
       >
-        <option value="all">All</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
+        <option value="default">Default</option>
+        <option value="completionRate">Completion Rate</option>
+        <option value="streak">Streak</option>
+        <option value="completionStatus">Completion Status</option>
       </select>
     </label>
+    @if (sortBy() !== 'default') {
+      <button class="btn-sort-direction" (click)="toggleSortDirection()">
+        {{ sortAscending() ? '↑ ASC' : '↓ DESC' }}
+      </button>
+    }
   </div>
 
   @if (loading()) {
@@ -61,8 +76,7 @@
       <ul class="habit-list">
         @for (habit of habits(); track habit.id) {
           <li class="habit-item"
-              [class.completed]="habit.isCompletedToday"
-              [class.inactive]="!habit.isActive">
+              [class.completed]="habit.isCompletedToday">
             @if (editingHabit()?.id === habit.id) {
               <div class="edit-form">
                 <input
@@ -82,13 +96,9 @@
                   type="checkbox"
                   [checked]="habit.isCompletedToday"
                   (change)="toggleComplete(habit)"
-                  [disabled]="!habit.isActive"
                 />
                 <div class="habit-info">
                   <span class="habit-title">{{ habit.title }}</span>
-                  @if (!habit.isActive) {
-                    <span class="inactive-badge">Inactive</span>
-                  }
                 </div>
                 <div class="habit-stats">
                   @if (habit.isCompletedToday && habit.currentStreak > 0) {
