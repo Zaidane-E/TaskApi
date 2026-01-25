@@ -65,27 +65,8 @@ appsettings.*.local.json
 *.pubxml
 *.publishsettings
 
-# Claude Code
+# OTHER
 .claude/
 DEPLOYMENT.md
 backend/TaskAPI/appsettings.Development.example.json
-logs/logs_55371962033/0_deploy.txt
-logs/logs_55371962033/1_build.txt
-logs/logs_55371962033/build/1_Set up job.txt
-logs/logs_55371962033/build/2_Run actions_checkout@v4.txt
-logs/logs_55371962033/build/3_Set up .NET Core.txt
-logs/logs_55371962033/build/4_Restore dependencies.txt
-logs/logs_55371962033/build/5_Build with dotnet.txt
-logs/logs_55371962033/build/6_dotnet publish.txt
-logs/logs_55371962033/build/7_Upload artifact for deployment job.txt
-logs/logs_55371962033/build/13_Post Set up .NET Core.txt
-logs/logs_55371962033/build/14_Post Run actions_checkout@v4.txt
-logs/logs_55371962033/build/15_Complete job.txt
-logs/logs_55371962033/build/system.txt
-logs/logs_55371962033/deploy/1_Set up job.txt
-logs/logs_55371962033/deploy/2_Download artifact from build job.txt
-logs/logs_55371962033/deploy/3_Login to Azure.txt
-logs/logs_55371962033/deploy/4_Deploy to Azure Web App.txt
-logs/logs_55371962033/deploy/8_Post Login to Azure.txt
-logs/logs_55371962033/deploy/9_Complete job.txt
-logs/logs_55371962033/deploy/system.txt
+logs/
