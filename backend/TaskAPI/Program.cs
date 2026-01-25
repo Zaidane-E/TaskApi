@@ -45,17 +45,26 @@ builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
 // Database configuration - PostgreSQL (Neon)
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+}
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 
 // JWT Authentication
-var jwtSecret = builder.Configuration["Jwt:Secret"]
-    ?? Environment.GetEnvironmentVariable("JWT_SECRET")
-    ?? throw new InvalidOperationException("JWT Secret is not configured");
+var jwtSecret = builder.Configuration["Jwt:Secret"];
+if (string.IsNullOrEmpty(jwtSecret))
+{
+    jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
+}
+if (string.IsNullOrEmpty(jwtSecret))
+{
+    throw new InvalidOperationException("JWT Secret is not configured");
+}
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -78,9 +87,14 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 // CORS from configuration or environment
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-    ?? Environment.GetEnvironmentVariable("CORS_ORIGINS")?.Split(',')
-    ?? ["http://localhost:4200"];
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+if (allowedOrigins == null || allowedOrigins.Length == 0)
+{
+    var corsEnv = Environment.GetEnvironmentVariable("CORS_ORIGINS");
+    allowedOrigins = !string.IsNullOrEmpty(corsEnv)
+        ? corsEnv.Split(',')
+        : ["http://localhost:4200"];
+}
 
 builder.Services.AddCors(options =>
 {
