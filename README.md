@@ -9,27 +9,27 @@ Currently supports user tasks, task priorities, due dates, and completion tracki
 
 ## Features
 
-- Task fields:
-  - Description
-  - Priority (Low, Medium, High)
-  - Due date
-  - Completion status
-  - Timestamps
-- Habit tracking
+- **Task Management**
+  - Description, priority (Low, Medium, High), due date
+  - Completion status and timestamps
+  - Task filtering
+- **Habit Tracking**
   - Add daily habits
-  - Track completion rate
-  - Track completion streak
-- Task filtering
-- User authentication with JWT
-- Optional guest mode (use the app without registering)
-- 
+  - Track completion rate and streaks
+- **Accountability System**
+  - Set daily goal percentage
+  - Custom penalties and rewards
+  - Daily logs with goal tracking
+- **User Authentication** with JWT
+- **Health Check** endpoint at `/health`
 
 ## To be added
 
 - Graph user stats
-- More customization options for penalties and rewards
-- Add streak of successful/failed days in a row
 - Journal
+- Improved test coverage
+- Improved accountability system with custom conditions
+- Streak system integrated with accountabity features
 
 ## Known Issues
 - Dashboard
@@ -40,8 +40,8 @@ Currently supports user tasks, task priorities, due dates, and completion tracki
 
 ## Technologies
 
-- **Backend:** C#, ASP.NET Core 8, Entity Framework Core 8, SQLite
-- **Frontend:** Angular (latest stable), TypeScript
+- **Backend:** C#, ASP.NET Core 8, Entity Framework Core 8, PostgreSQL (Neon)
+- **Frontend:** Angular, TypeScript
 - **Testing:** xUnit
 - **Other:** Swagger/OpenAPI, Git
 
