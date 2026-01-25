@@ -13,14 +13,15 @@ import {
   Penalty,
   Reward
 } from '../models/habit.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HabitService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5016/api/habits';
-  private readonly accountabilityUrl = 'http://localhost:5016/api/accountability';
+  private readonly apiUrl = `${environment.apiUrl}/habits`;
+  private readonly accountabilityUrl = `${environment.apiUrl}/accountability`;
 
   getHabits(): Observable<Habit[]> {
     return this.http.get<Habit[]>(this.apiUrl);

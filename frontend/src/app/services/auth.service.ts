@@ -2,13 +2,14 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { AuthState, LoginRequest, RegisterRequest, AuthResponse, User } from '../models/auth.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5016/api/auth';
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
 
   private authState = signal<AuthState>({
     isAuthenticated: false,
