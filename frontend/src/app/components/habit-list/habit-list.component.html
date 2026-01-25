@@ -1,10 +1,4 @@
 <div class="habit-container">
-  @if (isGuest()) {
-    <div class="guest-banner">
-      You're in guest mode. <a routerLink="/register">Register</a> to save your habits permanently.
-    </div>
-  }
-
   @if (error()) {
     <div class="error">
       {{ error() }}
@@ -26,9 +20,7 @@
     </div>
     <div class="progress-bar">
       <div class="progress-fill" [style.width.%]="progressPercent()"></div>
-      <div class="goal-marker" [style.left.%]="goalPercentage()">
-        <span class="goal-marker-label">{{ goalPercentage() }}%</span>
-      </div>
+      <div class="goal-marker" [style.left.%]="goalPercentage()"></div>
     </div>
     <div class="progress-percent">{{ progressPercent() }}%</div>
   </div>

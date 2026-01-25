@@ -20,7 +20,6 @@ export interface AuthResponse {
 
 export interface AuthState {
   isAuthenticated: boolean;
-  isGuest: boolean;
   user: User | null;
   token: string | null;
 }

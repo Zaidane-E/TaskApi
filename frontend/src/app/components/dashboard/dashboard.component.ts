@@ -1,9 +1,8 @@
 import { Component, computed, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { GuestTaskService } from '../../services/guest-task.service';
-import { GuestHabitService } from '../../services/guest-habit.service';
+import { TaskService } from '../../services/task.service';
+import { HabitService } from '../../services/habit.service';
 import { Task } from '../../models/task.model';
 import { Habit, AccountabilitySettings, AccountabilityLog, Penalty, Reward } from '../../models/habit.model';
 
@@ -17,7 +16,6 @@ interface WeekDay {
   habitsCompleted: number;
   habitsTotal: number;
   tasksCompleted: number;
-  tasksTotal: number;
 }
 
 @Component({
@@ -28,9 +26,8 @@ interface WeekDay {
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  private readonly authService = inject(AuthService);
-  private readonly guestTaskService = inject(GuestTaskService);
-  private readonly guestHabitService = inject(GuestHabitService);
+  private readonly taskService = inject(TaskService);
+  private readonly habitService = inject(HabitService);
   private intervalId: ReturnType<typeof setInterval> | null = null;
 
   currentDateTime = signal('');
@@ -38,16 +35,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   today = new Date();
 
   // Today's data
+  allTasks = signal<Task[]>([]);
   todaysTasks = signal<Task[]>([]);
   todaysHabits = signal<Habit[]>([]);
+
+  // Accountability
   accountabilitySettings = signal<AccountabilitySettings>({ goalPercentage: 80, penalties: [], rewards: [] });
   todayLog = signal<AccountabilityLog | null>(null);
-
-  // Random selection
   selectedPenalty = signal<Penalty | null>(null);
   selectedReward = signal<Reward | null>(null);
-
-  isGuest = this.authService.isGuest;
 
   // Computed values for tasks
   totalPendingTasks = computed(() => this.todaysTasks().length);
@@ -88,8 +84,42 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadData(): void {
-    this.loadWeekData();
-    this.loadTodaysData();
+    this.loadTasks();
+    this.loadHabits();
+    this.loadAccountability();
+  }
+
+  private loadTasks(): void {
+    this.taskService.getTasks().subscribe({
+      next: (tasks) => {
+        this.allTasks.set(tasks);
+
+        // Get all incomplete tasks, sorted by: overdue first, then by due date
+        const incompleteTasks = tasks
+          .filter(t => !t.isCompleted)
+          .sort((a, b) => {
+            if (a.isOverdue && !b.isOverdue) return -1;
+            if (!a.isOverdue && b.isOverdue) return 1;
+            if (a.dueDate && b.dueDate) return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+            if (a.dueDate && !b.dueDate) return -1;
+            if (!a.dueDate && b.dueDate) return 1;
+            return 0;
+          });
+
+        this.todaysTasks.set(incompleteTasks);
+        this.loadWeekData();
+      }
+    });
+  }
+
+  private loadHabits(): void {
+    this.habitService.getHabits().subscribe({
+      next: (habits) => {
+        const activeHabits = habits.filter(h => h.isActive);
+        this.todaysHabits.set(activeHabits);
+        this.loadWeekData();
+      }
+    });
   }
 
   private loadWeekData(): void {
@@ -97,12 +127,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     today.setHours(0, 0, 0, 0);
     const todayStr = this.getLocalDateString(today);
 
-    // Get start of week (Sunday)
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay());
 
     const days: WeekDay[] = [];
     const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const habits = this.todaysHabits();
+    const tasks = this.allTasks();
 
     for (let i = 0; i < 7; i++) {
       const date = new Date(startOfWeek);
@@ -110,8 +141,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const dateStr = this.getLocalDateString(date);
 
       // Get habit completion for this day
-      const habitStats = this.getHabitCompletionForDate(dateStr, todayStr);
-      const tasksCompleted = this.getTasksCompletedForDate(dateStr);
+      const habitStats = this.getHabitCompletionForDate(habits, dateStr, todayStr);
+      const tasksCompleted = this.getTasksCompletedForDate(tasks, dateStr);
 
       days.push({
         date,
@@ -122,8 +153,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         habitCompletion: habitStats.percentage,
         habitsCompleted: habitStats.completed,
         habitsTotal: habitStats.total,
-        tasksCompleted: tasksCompleted,
-        tasksTotal: 0 // Not used anymore
+        tasksCompleted
       });
     }
 
@@ -137,10 +167,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return `${year}-${month}-${day}`;
   }
 
-  private getHabitCompletionForDate(dateStr: string, todayStr: string): { completed: number; total: number; percentage: number } {
-    const habits = this.guestHabitService.getHabits().filter(h => h.isActive);
+  private getHabitCompletionForDate(habits: Habit[], dateStr: string, todayStr: string): { completed: number; total: number; percentage: number } {
     const total = habits.length;
-
     if (total === 0) return { completed: 0, total: 0, percentage: 0 };
 
     // For today, use current completion status
@@ -149,22 +177,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return { completed, total, percentage: Math.round((completed / total) * 100) };
     }
 
-    // For past days, check completion history
-    let completed = 0;
-    for (const habit of habits) {
-      const completions = this.guestHabitService.getCompletions(habit.id, 30);
-      if (completions.some(c => c.completedDate === dateStr)) {
-        completed++;
-      }
-    }
-
-    return { completed, total, percentage: Math.round((completed / total) * 100) };
+    // For other days, we'd need completion history from API
+    // For now, show 0 for past/future days (can be enhanced later)
+    return { completed: 0, total, percentage: 0 };
   }
 
-  private getTasksCompletedForDate(dateStr: string): number {
-    const tasks = this.guestTaskService.getTasks();
-
-    // Count tasks completed on this date
+  private getTasksCompletedForDate(tasks: Task[], dateStr: string): number {
     return tasks.filter(t => {
       if (!t.completedAt) return false;
       const completedDate = t.completedAt.split('T')[0];
@@ -172,52 +190,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }).length;
   }
 
-  private loadTodaysData(): void {
-    // Load tasks - show all incomplete tasks
-    const allTasks = this.guestTaskService.getTasks();
-
-    // Get all incomplete tasks, sorted by: overdue first, then by due date, then no due date
-    const incompleteTasks = allTasks
-      .filter(t => !t.isCompleted)
-      .sort((a, b) => {
-        // Overdue tasks first
-        if (a.isOverdue && !b.isOverdue) return -1;
-        if (!a.isOverdue && b.isOverdue) return 1;
-        // Then by due date (earliest first)
-        if (a.dueDate && b.dueDate) return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-        if (a.dueDate && !b.dueDate) return -1;
-        if (!a.dueDate && b.dueDate) return 1;
-        return 0;
-      });
-
-    this.todaysTasks.set(incompleteTasks);
-
-    // Load habits
-    const habits = this.guestHabitService.getHabits().filter(h => h.isActive);
-    this.todaysHabits.set(habits);
-
-    // Load accountability
-    this.accountabilitySettings.set(this.guestHabitService.getAccountabilitySettings());
-    this.todayLog.set(this.guestHabitService.getTodayLog());
-  }
-
   toggleHabit(habit: Habit): void {
-    const updated = habit.isCompletedToday
-      ? this.guestHabitService.uncompleteHabit(habit.id)
-      : this.guestHabitService.completeHabit(habit.id);
+    const action = habit.isCompletedToday
+      ? this.habitService.uncompleteHabit(habit.id)
+      : this.habitService.completeHabit(habit.id);
 
-    if (updated) {
-      this.todaysHabits.update(habits => habits.map(h => h.id === updated.id ? updated : h));
-      this.loadWeekData(); // Refresh week data
-    }
+    action.subscribe({
+      next: (updated) => {
+        this.todaysHabits.update(habits => habits.map(h => h.id === updated.id ? updated : h));
+        this.loadWeekData();
+      }
+    });
   }
 
   toggleTask(task: Task): void {
-    const updated = this.guestTaskService.toggleComplete(task.id);
-    if (updated) {
-      this.todaysTasks.update(tasks => tasks.map(t => t.id === updated.id ? updated : t));
-      this.loadWeekData(); // Refresh week data
-    }
+    this.taskService.toggleComplete(task.id).subscribe({
+      next: (updated) => {
+        this.allTasks.update(tasks => tasks.map(t => t.id === updated.id ? updated : t));
+        if (updated.isCompleted) {
+          this.todaysTasks.update(tasks => tasks.filter(t => t.id !== updated.id));
+        }
+        this.loadWeekData();
+      }
+    });
   }
 
   getCompletionColor(percentage: number): string {
@@ -234,6 +229,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // Accountability methods
+  private loadAccountability(): void {
+    this.habitService.getAccountabilitySettings().subscribe({
+      next: (settings) => {
+        this.accountabilitySettings.set(settings);
+      }
+    });
+
+    this.habitService.getTodayLog().subscribe({
+      next: (log) => {
+        this.todayLog.set(log);
+      }
+    });
+  }
+
   pickRandomPenalty(): void {
     const penalties = this.accountabilitySettings().penalties;
     if (penalties.length < 2) return;
@@ -249,24 +258,46 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   applyPenalty(penaltyId: number): void {
-    this.guestHabitService.applyPenalty(penaltyId);
-    this.todayLog.set(this.guestHabitService.getTodayLog());
-    this.selectedPenalty.set(null);
+    // First ensure we have a log for today
+    this.habitService.createOrUpdateLog().subscribe({
+      next: () => {
+        this.habitService.applyPenalty(penaltyId).subscribe({
+          next: (log) => {
+            this.todayLog.set(log);
+            this.selectedPenalty.set(null);
+          }
+        });
+      }
+    });
   }
 
   claimReward(rewardId: number): void {
-    this.guestHabitService.claimReward(rewardId);
-    this.todayLog.set(this.guestHabitService.getTodayLog());
-    this.selectedReward.set(null);
+    // First ensure we have a log for today
+    this.habitService.createOrUpdateLog().subscribe({
+      next: () => {
+        this.habitService.claimReward(rewardId).subscribe({
+          next: (log) => {
+            this.todayLog.set(log);
+            this.selectedReward.set(null);
+          }
+        });
+      }
+    });
   }
 
   cancelPenalty(): void {
-    this.guestHabitService.cancelPenalty();
-    this.todayLog.set(this.guestHabitService.getTodayLog());
+    this.habitService.cancelPenalty().subscribe({
+      next: (log) => {
+        this.todayLog.set(log);
+      }
+    });
   }
 
   cancelReward(): void {
-    this.guestHabitService.cancelReward();
-    this.todayLog.set(this.guestHabitService.getTodayLog());
+    this.habitService.cancelReward().subscribe({
+      next: (log) => {
+        this.todayLog.set(log);
+      }
+    });
   }
 }

@@ -1,9 +1,7 @@
 import { Component, computed, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { HabitService } from '../../services/habit.service';
-import { GuestHabitService } from '../../services/guest-habit.service';
 import { Habit, HabitSortOption, CreateHabit, UpdateHabit } from '../../models/habit.model';
 
 @Component({
@@ -14,9 +12,7 @@ import { Habit, HabitSortOption, CreateHabit, UpdateHabit } from '../../models/h
   styleUrl: './habit-list.component.css'
 })
 export class HabitListComponent implements OnInit, OnDestroy {
-  private readonly authService = inject(AuthService);
   private readonly habitService = inject(HabitService);
-  private readonly guestHabitService = inject(GuestHabitService);
   private intervalId: ReturnType<typeof setInterval> | null = null;
 
   habits = signal<Habit[]>([]);
@@ -29,6 +25,7 @@ export class HabitListComponent implements OnInit, OnDestroy {
 
   sortBy = signal<HabitSortOption>('default');
   sortAscending = signal<boolean>(false);
+  goalPercentage = signal(80);
 
   completedTodayCount = computed(() => this.habits().filter(h => h.isCompletedToday && h.isActive).length);
   pendingCount = computed(() => this.habits().filter(h => !h.isCompletedToday && h.isActive).length);
@@ -39,16 +36,19 @@ export class HabitListComponent implements OnInit, OnDestroy {
     return Math.round((this.completedTodayCount() / total) * 100);
   });
 
-  goalPercentage = computed(() => {
-    return this.guestHabitService.getAccountabilitySettings().goalPercentage;
-  });
-
-  isGuest = this.authService.isGuest;
-
   ngOnInit(): void {
     this.loadHabits();
+    this.loadGoal();
     this.updateDateTime();
     this.intervalId = setInterval(() => this.updateDateTime(), 1000);
+  }
+
+  private loadGoal(): void {
+    this.habitService.getAccountabilitySettings().subscribe({
+      next: (settings) => {
+        this.goalPercentage.set(settings.goalPercentage);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -96,23 +96,17 @@ export class HabitListComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.error.set(null);
 
-    if (this.authService.isGuest()) {
-      const habits = this.guestHabitService.getHabits();
-      this.habits.set(this.sortHabits(habits));
-      this.loading.set(false);
-    } else {
-      this.habitService.getHabits().subscribe({
-        next: (habits) => {
-          this.habits.set(this.sortHabits(habits));
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.error.set('Failed to load habits.');
-          this.loading.set(false);
-          console.error(err);
-        }
-      });
-    }
+    this.habitService.getHabits().subscribe({
+      next: (habits) => {
+        this.habits.set(this.sortHabits(habits));
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set('Failed to load habits.');
+        this.loading.set(false);
+        console.error(err);
+      }
+    });
   }
 
   addHabit(): void {
@@ -121,22 +115,16 @@ export class HabitListComponent implements OnInit, OnDestroy {
 
     const createDto: CreateHabit = { title };
 
-    if (this.authService.isGuest()) {
-      const habit = this.guestHabitService.createHabit(createDto);
-      this.habits.update(habits => [...habits, habit]);
-      this.resetNewHabitForm();
-    } else {
-      this.habitService.createHabit(createDto).subscribe({
-        next: (habit) => {
-          this.habits.update(habits => [...habits, habit]);
-          this.resetNewHabitForm();
-        },
-        error: (err) => {
-          this.error.set('Failed to create habit.');
-          console.error(err);
-        }
-      });
-    }
+    this.habitService.createHabit(createDto).subscribe({
+      next: (habit) => {
+        this.habits.update(habits => [...habits, habit]);
+        this.resetNewHabitForm();
+      },
+      error: (err) => {
+        this.error.set('Failed to create habit.');
+        console.error(err);
+      }
+    });
   }
 
   private resetNewHabitForm(): void {
@@ -144,30 +132,21 @@ export class HabitListComponent implements OnInit, OnDestroy {
   }
 
   toggleComplete(habit: Habit): void {
-    if (this.authService.isGuest()) {
-      const updated = habit.isCompletedToday
-        ? this.guestHabitService.uncompleteHabit(habit.id)
-        : this.guestHabitService.completeHabit(habit.id);
-      if (updated) {
-        this.habits.update(habits => habits.map(h => h.id === updated.id ? updated : h));
-      }
-    } else {
-      const request = habit.isCompletedToday
-        ? this.habitService.uncompleteHabit(habit.id)
-        : this.habitService.completeHabit(habit.id);
+    const request = habit.isCompletedToday
+      ? this.habitService.uncompleteHabit(habit.id)
+      : this.habitService.completeHabit(habit.id);
 
-      request.subscribe({
-        next: (updatedHabit) => {
-          this.habits.update(habits =>
-            habits.map(h => h.id === updatedHabit.id ? updatedHabit : h)
-          );
-        },
-        error: (err) => {
-          this.error.set('Failed to update habit.');
-          console.error(err);
-        }
-      });
-    }
+    request.subscribe({
+      next: (updatedHabit) => {
+        this.habits.update(habits =>
+          habits.map(h => h.id === updatedHabit.id ? updatedHabit : h)
+        );
+      },
+      error: (err) => {
+        this.error.set('Failed to update habit.');
+        console.error(err);
+      }
+    });
   }
 
   startEdit(habit: Habit): void {
@@ -187,26 +166,18 @@ export class HabitListComponent implements OnInit, OnDestroy {
       isActive: habit.isActive
     };
 
-    if (this.authService.isGuest()) {
-      const updated = this.guestHabitService.updateHabit(habit.id, updateDto);
-      if (updated) {
-        this.habits.update(habits => habits.map(h => h.id === updated.id ? updated : h));
+    this.habitService.updateHabit(habit.id, updateDto).subscribe({
+      next: (updatedHabit) => {
+        this.habits.update(habits =>
+          habits.map(h => h.id === updatedHabit.id ? updatedHabit : h)
+        );
+        this.cancelEdit();
+      },
+      error: (err) => {
+        this.error.set('Failed to update habit.');
+        console.error(err);
       }
-      this.cancelEdit();
-    } else {
-      this.habitService.updateHabit(habit.id, updateDto).subscribe({
-        next: (updatedHabit) => {
-          this.habits.update(habits =>
-            habits.map(h => h.id === updatedHabit.id ? updatedHabit : h)
-          );
-          this.cancelEdit();
-        },
-        error: (err) => {
-          this.error.set('Failed to update habit.');
-          console.error(err);
-        }
-      });
-    }
+    });
   }
 
   cancelEdit(): void {
@@ -215,20 +186,15 @@ export class HabitListComponent implements OnInit, OnDestroy {
   }
 
   deleteHabit(id: number): void {
-    if (this.authService.isGuest()) {
-      this.guestHabitService.deleteHabit(id);
-      this.habits.update(habits => habits.filter(h => h.id !== id));
-    } else {
-      this.habitService.deleteHabit(id).subscribe({
-        next: () => {
-          this.habits.update(habits => habits.filter(h => h.id !== id));
-        },
-        error: (err) => {
-          this.error.set('Failed to delete habit.');
-          console.error(err);
-        }
-      });
-    }
+    this.habitService.deleteHabit(id).subscribe({
+      next: () => {
+        this.habits.update(habits => habits.filter(h => h.id !== id));
+      },
+      error: (err) => {
+        this.error.set('Failed to delete habit.');
+        console.error(err);
+      }
+    });
   }
 
   applySort(): void {

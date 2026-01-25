@@ -2,9 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { AuthService } from '../../services/auth.service';
 import { HabitService } from '../../services/habit.service';
-import { GuestHabitService } from '../../services/guest-habit.service';
 import { Habit, HabitStats } from '../../models/habit.model';
 
 interface DayData {
@@ -33,9 +31,7 @@ interface MonthData {
   styleUrl: './habit-overview.component.css'
 })
 export class HabitOverviewComponent implements OnInit {
-  private readonly authService = inject(AuthService);
   private readonly habitService = inject(HabitService);
-  private readonly guestHabitService = inject(GuestHabitService);
 
   habits = signal<Habit[]>([]);
   habitStats = signal<Map<number, HabitStats>>(new Map());
@@ -47,8 +43,6 @@ export class HabitOverviewComponent implements OnInit {
 
   calendarDays = signal<DayData[]>([]);
   monthlyStats = signal<MonthData[]>([]);
-
-  isGuest = this.authService.isGuest;
 
   // Computed stats
   totalCompletions = computed(() => {
@@ -96,32 +90,6 @@ export class HabitOverviewComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    if (this.authService.isGuest()) {
-      this.loadGuestData();
-    } else {
-      this.loadServerData();
-    }
-  }
-
-  private loadGuestData(): void {
-    const habits = this.guestHabitService.getHabits();
-    this.habits.set(habits);
-
-    const statsMap = new Map<number, HabitStats>();
-    habits.forEach(habit => {
-      const stats = this.guestHabitService.getStats(habit.id, 365);
-      if (stats) {
-        statsMap.set(habit.id, stats);
-      }
-    });
-    this.habitStats.set(statsMap);
-
-    this.buildCalendar();
-    this.buildMonthlyStats();
-    this.loading.set(false);
-  }
-
-  private loadServerData(): void {
     this.habitService.getHabits().subscribe({
       next: (habits) => {
         this.habits.set(habits);

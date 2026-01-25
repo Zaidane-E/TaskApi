@@ -46,21 +46,6 @@
         />
       </div>
 
-      @if (hasGuestTasks) {
-        <div class="sync-option">
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [ngModel]="syncGuestTasks()"
-              (ngModelChange)="syncGuestTasks.set($event)"
-              name="syncGuestTasks"
-              [disabled]="loading()"
-            />
-            <span>Sync my guest tasks to my new account</span>
-          </label>
-        </div>
-      }
-
       <button type="submit" class="btn-primary" [disabled]="loading()">
         {{ loading() ? 'Creating account...' : 'Create Account' }}
       </button>

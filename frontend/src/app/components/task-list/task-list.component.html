@@ -1,10 +1,4 @@
 <div class="task-container">
-  @if (isGuest()) {
-    <div class="guest-banner">
-      You're in guest mode. <a routerLink="/register">Register</a> to save your tasks permanently.
-    </div>
-  }
-
   @if (error()) {
     <div class="error">
       {{ error() }}

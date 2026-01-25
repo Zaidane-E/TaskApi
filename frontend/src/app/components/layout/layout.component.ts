@@ -17,9 +17,4 @@ export class LayoutComponent {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
-
-  exitGuestMode(): void {
-    this.authService.exitGuestMode();
-    this.router.navigate(['/login']);
-  }
 }

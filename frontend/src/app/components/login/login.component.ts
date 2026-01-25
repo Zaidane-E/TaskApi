@@ -41,9 +41,4 @@ export class LoginComponent {
       }
     });
   }
-
-  enterGuestMode(): void {
-    this.authService.enterGuestMode();
-    this.router.navigate(['/tasks']);
-  }
 }

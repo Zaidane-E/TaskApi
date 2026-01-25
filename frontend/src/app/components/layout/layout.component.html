@@ -4,7 +4,7 @@
       <h1 class="logo">
         <a routerLink="/tasks">Chara</a>
       </h1>
-      @if (authService.isAuthenticated() || authService.isGuest()) {
+      @if (authService.isAuthenticated()) {
         <nav class="main-nav">
           <a routerLink="/dashboard" routerLinkActive="active" class="nav-tab">Dashboard</a>
           <a routerLink="/tasks" routerLinkActive="active" class="nav-tab">Tasks</a>
@@ -15,10 +15,6 @@
         @if (authService.isAuthenticated()) {
           <span class="user-email">{{ authService.user()?.email }}</span>
           <button class="btn-logout" (click)="logout()">Logout</button>
-        } @else if (authService.isGuest()) {
-          <span class="guest-label">Guest Mode</span>
-          <a routerLink="/register" class="btn-register">Register</a>
-          <button class="btn-logout" (click)="exitGuestMode()">Exit</button>
         } @else {
           <a routerLink="/login" class="btn-nav">Login</a>
           <a routerLink="/register" class="btn-register">Register</a>

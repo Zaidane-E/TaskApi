@@ -1,9 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { TaskService } from '../../services/task.service';
-import { GuestTaskService } from '../../services/guest-task.service';
 import { Task, Priority, TaskFilter, CreateTask, UpdateTask } from '../../models/task.model';
 
 @Component({
@@ -14,9 +12,7 @@ import { Task, Priority, TaskFilter, CreateTask, UpdateTask } from '../../models
   styleUrl: './task-list.component.css'
 })
 export class TaskListComponent implements OnInit {
-  private readonly authService = inject(AuthService);
   private readonly taskService = inject(TaskService);
-  private readonly guestTaskService = inject(GuestTaskService);
 
   tasks = signal<Task[]>([]);
   newTaskTitle = signal('');
@@ -37,7 +33,6 @@ export class TaskListComponent implements OnInit {
   completedCount = computed(() => this.tasks().filter(t => t.isCompleted).length);
   pendingCount = computed(() => this.tasks().filter(t => !t.isCompleted).length);
 
-  isGuest = this.authService.isGuest;
   priorities: Priority[] = ['Low', 'Medium', 'High'];
 
   ngOnInit(): void {
@@ -64,23 +59,17 @@ export class TaskListComponent implements OnInit {
     this.error.set(null);
     const filter = this.buildFilter();
 
-    if (this.authService.isGuest()) {
-      const tasks = this.guestTaskService.getTasks(filter);
-      this.tasks.set(this.addOverdueFlag(tasks));
-      this.loading.set(false);
-    } else {
-      this.taskService.getTasks(filter).subscribe({
-        next: (tasks) => {
-          this.tasks.set(this.addOverdueFlag(tasks));
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.error.set('Failed to load tasks.');
-          this.loading.set(false);
-          console.error(err);
-        }
-      });
-    }
+    this.taskService.getTasks(filter).subscribe({
+      next: (tasks) => {
+        this.tasks.set(this.addOverdueFlag(tasks));
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set('Failed to load tasks.');
+        this.loading.set(false);
+        console.error(err);
+      }
+    });
   }
 
   private addOverdueFlag(tasks: Task[]): Task[] {
@@ -102,22 +91,16 @@ export class TaskListComponent implements OnInit {
       dueDate: this.newTaskDueDate() || null
     };
 
-    if (this.authService.isGuest()) {
-      const task = this.guestTaskService.createTask(createDto);
-      this.tasks.update(tasks => [this.addOverdueFlag([task])[0], ...tasks]);
-      this.resetNewTaskForm();
-    } else {
-      this.taskService.createTask(createDto).subscribe({
-        next: (task) => {
-          this.tasks.update(tasks => [this.addOverdueFlag([task])[0], ...tasks]);
-          this.resetNewTaskForm();
-        },
-        error: (err) => {
-          this.error.set('Failed to create task.');
-          console.error(err);
-        }
-      });
-    }
+    this.taskService.createTask(createDto).subscribe({
+      next: (task) => {
+        this.tasks.update(tasks => [this.addOverdueFlag([task])[0], ...tasks]);
+        this.resetNewTaskForm();
+      },
+      error: (err) => {
+        this.error.set('Failed to create task.');
+        console.error(err);
+      }
+    });
   }
 
   private resetNewTaskForm(): void {
@@ -127,24 +110,17 @@ export class TaskListComponent implements OnInit {
   }
 
   toggleComplete(task: Task): void {
-    if (this.authService.isGuest()) {
-      const updated = this.guestTaskService.toggleComplete(task.id);
-      if (updated) {
-        this.tasks.update(tasks => tasks.map(t => t.id === updated.id ? this.addOverdueFlag([updated])[0] : t));
+    this.taskService.toggleComplete(task.id).subscribe({
+      next: (updatedTask) => {
+        this.tasks.update(tasks =>
+          tasks.map(t => t.id === updatedTask.id ? this.addOverdueFlag([updatedTask])[0] : t)
+        );
+      },
+      error: (err) => {
+        this.error.set('Failed to toggle task.');
+        console.error(err);
       }
-    } else {
-      this.taskService.toggleComplete(task.id).subscribe({
-        next: (updatedTask) => {
-          this.tasks.update(tasks =>
-            tasks.map(t => t.id === updatedTask.id ? this.addOverdueFlag([updatedTask])[0] : t)
-          );
-        },
-        error: (err) => {
-          this.error.set('Failed to toggle task.');
-          console.error(err);
-        }
-      });
-    }
+    });
   }
 
   startEdit(task: Task): void {
@@ -168,26 +144,18 @@ export class TaskListComponent implements OnInit {
       dueDate: this.editDueDate() || null
     };
 
-    if (this.authService.isGuest()) {
-      const updated = this.guestTaskService.updateTask(task.id, updateDto);
-      if (updated) {
-        this.tasks.update(tasks => tasks.map(t => t.id === updated.id ? this.addOverdueFlag([updated])[0] : t));
+    this.taskService.updateTask(task.id, updateDto).subscribe({
+      next: (updatedTask) => {
+        this.tasks.update(tasks =>
+          tasks.map(t => t.id === updatedTask.id ? this.addOverdueFlag([updatedTask])[0] : t)
+        );
+        this.cancelEdit();
+      },
+      error: (err) => {
+        this.error.set('Failed to update task.');
+        console.error(err);
       }
-      this.cancelEdit();
-    } else {
-      this.taskService.updateTask(task.id, updateDto).subscribe({
-        next: (updatedTask) => {
-          this.tasks.update(tasks =>
-            tasks.map(t => t.id === updatedTask.id ? this.addOverdueFlag([updatedTask])[0] : t)
-          );
-          this.cancelEdit();
-        },
-        error: (err) => {
-          this.error.set('Failed to update task.');
-          console.error(err);
-        }
-      });
-    }
+    });
   }
 
   cancelEdit(): void {
@@ -198,20 +166,15 @@ export class TaskListComponent implements OnInit {
   }
 
   deleteTask(id: number): void {
-    if (this.authService.isGuest()) {
-      this.guestTaskService.deleteTask(id);
-      this.tasks.update(tasks => tasks.filter(t => t.id !== id));
-    } else {
-      this.taskService.deleteTask(id).subscribe({
-        next: () => {
-          this.tasks.update(tasks => tasks.filter(t => t.id !== id));
-        },
-        error: (err) => {
-          this.error.set('Failed to delete task.');
-          console.error(err);
-        }
-      });
-    }
+    this.taskService.deleteTask(id).subscribe({
+      next: () => {
+        this.tasks.update(tasks => tasks.filter(t => t.id !== id));
+      },
+      error: (err) => {
+        this.error.set('Failed to delete task.');
+        console.error(err);
+      }
+    });
   }
 
   applyFilters(): void {

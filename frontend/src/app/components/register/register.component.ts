@@ -2,7 +2,6 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { GuestTaskService } from '../../services/guest-task.service';
 
 @Component({
   selector: 'app-register',
@@ -13,17 +12,13 @@ import { GuestTaskService } from '../../services/guest-task.service';
 })
 export class RegisterComponent {
   private readonly authService = inject(AuthService);
-  private readonly guestTaskService = inject(GuestTaskService);
   private readonly router = inject(Router);
 
   email = signal('');
   password = signal('');
   confirmPassword = signal('');
-  syncGuestTasks = signal(true);
   error = signal<string | null>(null);
   loading = signal(false);
-
-  hasGuestTasks = this.guestTaskService.hasGuestTasks();
 
   register(): void {
     const emailVal = this.email().trim();
@@ -50,30 +45,11 @@ export class RegisterComponent {
 
     this.authService.register({ email: emailVal, password: passwordVal }).subscribe({
       next: () => {
-        if (this.hasGuestTasks && this.syncGuestTasks()) {
-          this.syncTasks();
-        } else {
-          this.guestTaskService.clearTasks();
-          this.router.navigate(['/tasks']);
-        }
+        this.router.navigate(['/tasks']);
       },
       error: (err) => {
         this.error.set(err.error?.message || 'Registration failed. Please try again.');
         this.loading.set(false);
-      }
-    });
-  }
-
-  private syncTasks(): void {
-    const tasks = this.guestTaskService.getAllTasks();
-    this.authService.syncGuestTasks(tasks).subscribe({
-      next: () => {
-        this.guestTaskService.clearTasks();
-        this.router.navigate(['/tasks']);
-      },
-      error: () => {
-        this.guestTaskService.clearTasks();
-        this.router.navigate(['/tasks']);
       }
     });
   }

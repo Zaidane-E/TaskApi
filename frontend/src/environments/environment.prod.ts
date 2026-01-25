@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://your-azure-app.azurewebsites.net/api'
+  // Replace with your Azure App Service URL after deployment
+  apiUrl: 'https://taskapi-backend.azurewebsites.net/api'
 };

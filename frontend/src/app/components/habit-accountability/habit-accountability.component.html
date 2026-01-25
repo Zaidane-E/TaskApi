@@ -1,107 +1,68 @@
 <div class="accountability-container">
-  @if (isGuest()) {
-    <div class="guest-banner">
-      You're in guest mode. <a routerLink="/register">Register</a> to save your data permanently.
-    </div>
-  }
-
-  @if (error()) {
-    <div class="error">
-      {{ error() }}
-      <button class="btn-close" (click)="error.set(null)">x</button>
-    </div>
-  }
-
   <div class="nav-tabs">
     <a routerLink="/habits" class="tab-link">Habits</a>
     <a routerLink="/habits/overview" class="tab-link">Overview</a>
     <a routerLink="/habits/accountability" class="tab-link active">Accountability</a>
   </div>
 
-  @if (loading()) {
-    <div class="loading">Loading accountability data...</div>
+  @if (error()) {
+    <div class="error" (click)="clearError()">
+      {{ error() }}
+      <span class="error-close">X</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="loading">Loading...</div>
   } @else {
-    <!-- Daily Goal Section -->
+    <!-- Today's Progress -->
+    <div class="section progress-section">
+      <h2 class="section-title">Today's Progress</h2>
+      <div class="progress-stats">
+        <span class="progress-count">{{ habitsCompletedToday() }}/{{ todaysHabits().length }} habits completed</span>
+        <span class="progress-percent" [class.goal-met]="goalMet()" [class.goal-missed]="!goalMet()">
+          {{ progressPercent() }}%
+        </span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="progressPercent()"></div>
+        <div class="goal-marker" [style.left.%]="settings().goalPercentage"></div>
+      </div>
+      <div class="goal-status" [class.met]="goalMet()" [class.missed]="!goalMet()">
+        @if (goalMet()) {
+          Goal met!
+        } @else {
+          {{ settings().goalPercentage - progressPercent() }}% more to reach goal
+        }
+      </div>
+    </div>
+
+    <!-- Goal Setting -->
     <div class="section goal-section">
-      <div class="section-header">
-        <h2 class="section-title">Daily Goal</h2>
-      </div>
-      <div class="goal-form">
-        <label class="goal-label">
-          Target completion rate:
-          <div class="goal-input-group">
-            <input
-              type="text"
-              class="goal-input"
-              [ngModel]="goalInput()"
-              (ngModelChange)="onGoalInputChange($event)"
-              (keyup.enter)="saveGoal()"
-              (blur)="validateGoalInput()"
-              maxlength="3"
-            />
-            <span class="goal-percent">%</span>
-          </div>
-        </label>
-        <button class="btn-save" (click)="saveGoal()">Save Goal</button>
+      <h2 class="section-title">Daily Goal</h2>
+      <p class="section-description">Set your daily habit completion target percentage.</p>
+      <div class="goal-input-row">
+        <div class="goal-input-group">
+          <input
+            type="text"
+            class="goal-input"
+            [ngModel]="goalInput()"
+            (ngModelChange)="onGoalInputChange($event)"
+            (keyup.enter)="updateGoal()"
+          />
+          <span class="goal-suffix">%</span>
+        </div>
+        <button class="btn-save" (click)="updateGoal()" [disabled]="goalInput() === settings().goalPercentage">Save</button>
       </div>
     </div>
 
-    <!-- Today's Status Section -->
-    <div class="section status-section" [class.goal-met]="goalMet()" [class.goal-missed]="!goalMet()">
-      <div class="section-header">
-        <h2 class="section-title">Today's Status</h2>
-      </div>
-      <div class="status-content">
-        <div class="status-stats">
-          <div class="status-item">
-            <span class="status-label">Current</span>
-            <span class="status-value">{{ dailyStatus().percentage }}%</span>
-            <span class="status-detail">({{ dailyStatus().completed }}/{{ dailyStatus().total }} habits)</span>
-          </div>
-          <div class="status-item">
-            <span class="status-label">Goal</span>
-            <span class="status-value">{{ settings().goalPercentage }}%</span>
-          </div>
-          <div class="status-item">
-            <span class="status-label">Status</span>
-            <span class="status-badge" [class.met]="goalMet()" [class.missed]="!goalMet()">
-              {{ goalMet() ? 'Goal Met' : 'Not Met' }}
-            </span>
-          </div>
-        </div>
-        <div class="status-actions">
-          @if (!goalMet() && settings().penalties.length > 0) {
-            @if (todayLog()?.penaltyApplied) {
-              <div class="status-btn-wrapper">
-                <span class="status-applied">Penalty Applied</span>
-                <button class="btn-undo btn-undo-penalty" (click)="cancelPenalty()">Undo</button>
-              </div>
-            } @else {
-              <button class="btn-penalty" (click)="applyPenalty()">Apply Penalty</button>
-            }
-          }
-          @if (goalMet() && settings().rewards.length > 0) {
-            @if (todayLog()?.rewardClaimed) {
-              <div class="status-btn-wrapper">
-                <span class="status-claimed">Reward Claimed</span>
-                <button class="btn-undo btn-undo-reward" (click)="cancelReward()">Undo</button>
-              </div>
-            } @else {
-              <button class="btn-reward" (click)="claimReward()">Claim Reward</button>
-            }
-          }
-        </div>
-      </div>
-    </div>
-
-    <!-- Penalties & Rewards Section -->
-    <div class="section-row">
-      <!-- Penalties -->
+    <div class="two-column">
+      <!-- Penalties Section -->
       <div class="section penalties-section">
-        <div class="section-header">
-          <h2 class="section-title">Penalties</h2>
-        </div>
-        <div class="item-form">
+        <h2 class="section-title">Penalties</h2>
+        <p class="section-description">Consequences when you miss your daily goal.</p>
+
+        <div class="add-item-form">
           <input
             type="text"
             class="item-input"
@@ -110,32 +71,31 @@
             (ngModelChange)="newPenalty.set($event)"
             (keyup.enter)="addPenalty()"
           />
-          <button class="btn-add" (click)="addPenalty()">+</button>
+          <button class="btn-add penalty" (click)="addPenalty()" [disabled]="!newPenalty().trim()">Add</button>
         </div>
+
         <ul class="item-list">
           @for (penalty of settings().penalties; track penalty.id) {
-            <li class="item" [class.highlighted]="randomPenalty()?.id === penalty.id">
+            <li class="item" [class.highlighted]="selectedPenalty()?.id === penalty.id">
               <span class="item-text">{{ penalty.description }}</span>
-              <button class="btn-remove" (click)="removePenalty(penalty.id)">x</button>
+              <button class="btn-remove" (click)="removePenalty(penalty.id)">X</button>
             </li>
-          }
-          @if (settings().penalties.length === 0) {
-            <li class="item-empty">No penalties added</li>
+          } @empty {
+            <li class="empty-item">No penalties added yet</li>
           }
         </ul>
-        @if (settings().penalties.length > 1) {
-          <button class="btn-random btn-random-penalty" (click)="pickRandomPenalty()">
-            Random Pick
-          </button>
+
+        @if (settings().penalties.length >= 2) {
+          <button class="btn-random penalty" (click)="pickRandomPenalty()">Pick Random</button>
         }
       </div>
 
-      <!-- Rewards -->
+      <!-- Rewards Section -->
       <div class="section rewards-section">
-        <div class="section-header">
-          <h2 class="section-title">Rewards</h2>
-        </div>
-        <div class="item-form">
+        <h2 class="section-title">Rewards</h2>
+        <p class="section-description">Treats when you meet your daily goal.</p>
+
+        <div class="add-item-form">
           <input
             type="text"
             class="item-input"
@@ -144,55 +104,22 @@
             (ngModelChange)="newReward.set($event)"
             (keyup.enter)="addReward()"
           />
-          <button class="btn-add" (click)="addReward()">+</button>
+          <button class="btn-add reward" (click)="addReward()" [disabled]="!newReward().trim()">Add</button>
         </div>
+
         <ul class="item-list">
           @for (reward of settings().rewards; track reward.id) {
-            <li class="item" [class.highlighted]="randomReward()?.id === reward.id">
+            <li class="item" [class.highlighted]="selectedReward()?.id === reward.id">
               <span class="item-text">{{ reward.description }}</span>
-              <button class="btn-remove" (click)="removeReward(reward.id)">x</button>
+              <button class="btn-remove" (click)="removeReward(reward.id)">X</button>
             </li>
-          }
-          @if (settings().rewards.length === 0) {
-            <li class="item-empty">No rewards added</li>
+          } @empty {
+            <li class="empty-item">No rewards added yet</li>
           }
         </ul>
-        @if (settings().rewards.length > 1) {
-          <button class="btn-random btn-random-reward" (click)="pickRandomReward()">
-            Random Pick
-          </button>
-        }
-      </div>
-    </div>
 
-    <!-- History Section -->
-    <div class="section history-section">
-      <div class="section-header">
-        <h2 class="section-title">History (Last 7 Days)</h2>
-      </div>
-      <div class="history-table">
-        <div class="history-header">
-          <span class="col-date">Date</span>
-          <span class="col-rate">Rate</span>
-          <span class="col-goal">Goal</span>
-          <span class="col-penalty">Penalty</span>
-          <span class="col-reward">Reward</span>
-        </div>
-        @for (log of historyLogs(); track log.id) {
-          <div class="history-row" [class.met]="log.goalMet" [class.missed]="!log.goalMet">
-            <span class="col-date">{{ formatDate(log.date) }}</span>
-            <span class="col-rate">{{ log.completionRate }}%</span>
-            <span class="col-goal">
-              <span class="goal-icon" [class.met]="log.goalMet" [class.missed]="!log.goalMet">
-                {{ log.goalMet ? 'Y' : 'X' }}
-              </span>
-            </span>
-            <span class="col-penalty">{{ log.penaltyApplied ? 'Applied' : '-' }}</span>
-            <span class="col-reward">{{ log.rewardClaimed ? 'Claimed' : '-' }}</span>
-          </div>
-        }
-        @if (historyLogs().length === 0) {
-          <div class="history-empty">No history yet</div>
+        @if (settings().rewards.length >= 2) {
+          <button class="btn-random reward" (click)="pickRandomReward()">Pick Random</button>
         }
       </div>
     </div>

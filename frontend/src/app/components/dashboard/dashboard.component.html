@@ -1,9 +1,4 @@
 <div class="dashboard-container">
-  @if (isGuest()) {
-    <div class="guest-banner">
-      You're in guest mode. <a routerLink="/register">Register</a> to save your data permanently.
-    </div>
-  }
   <div class="dashboard-header">
     <h1 class="dashboard-title">Dashboard</h1>
     <span class="datetime">{{ currentDateTime() }}</span>
