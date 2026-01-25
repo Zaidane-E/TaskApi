@@ -7,6 +7,9 @@ using TaskAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add environment variables (for Azure App Service)
+builder.Configuration.AddEnvironmentVariables();
+
 // Add services to the container
 builder.Services.AddEndpointsApiExplorer();
 
@@ -40,12 +43,19 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddControllers();
 
-// Database configuration - PostgreSQL for development, SQL Server for production
+// Database configuration - PostgreSQL (Neon)
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 
 // JWT Authentication
+var jwtSecret = builder.Configuration["Jwt:Secret"]
+    ?? Environment.GetEnvironmentVariable("JWT_SECRET")
+    ?? throw new InvalidOperationException("JWT Secret is not configured");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -57,8 +67,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
         };
     });
 
@@ -67,13 +76,16 @@ builder.Services.AddAuthorization();
 // Register JWT service
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-// CORS from configuration
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+// CORS from configuration or environment
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? Environment.GetEnvironmentVariable("CORS_ORIGINS")?.Split(',')
+    ?? ["http://localhost:4200"];
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins(allowedOrigins ?? ["http://localhost:4200"])
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });

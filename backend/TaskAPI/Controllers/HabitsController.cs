@@ -27,7 +27,7 @@ public class HabitsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get([FromQuery] bool? isActive = null)
+    public async Task<IActionResult> Get([FromQuery] bool? isActive = null, [FromQuery] string? localDate = null)
     {
         var userId = GetUserId();
         var query = _context.Habits
@@ -37,13 +37,18 @@ public class HabitsController : ControllerBase
         if (isActive.HasValue)
             query = query.Where(h => h.IsActive == isActive.Value);
 
+        // Parse client's local date if provided
+        DateOnly? clientToday = !string.IsNullOrEmpty(localDate) && DateOnly.TryParse(localDate, out var parsedDate)
+            ? parsedDate
+            : null;
+
         var habits = await query.OrderBy(h => h.SortOrder).ThenByDescending(h => h.CreatedAt).ToListAsync();
-        var response = habits.Select(h => MapToResponseDto(h)).ToList();
+        var response = habits.Select(h => MapToResponseDto(h, clientToday)).ToList();
         return Ok(response);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetById(int id, [FromQuery] string? localDate = null)
     {
         var userId = GetUserId();
         var habit = await _context.Habits
@@ -53,7 +58,11 @@ public class HabitsController : ControllerBase
         if (habit == null)
             return NotFound();
 
-        return Ok(MapToResponseDto(habit));
+        DateOnly? clientToday = !string.IsNullOrEmpty(localDate) && DateOnly.TryParse(localDate, out var parsedDate)
+            ? parsedDate
+            : null;
+
+        return Ok(MapToResponseDto(habit, clientToday));
     }
 
     [HttpPost]
@@ -82,7 +91,7 @@ public class HabitsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateHabitDto dto)
+    public async Task<IActionResult> Update(int id, UpdateHabitDto dto, [FromQuery] string? localDate = null)
     {
         var userId = GetUserId();
         var habit = await _context.Habits
@@ -96,8 +105,12 @@ public class HabitsController : ControllerBase
         habit.IsActive = dto.IsActive;
         habit.UpdatedAt = DateTime.UtcNow;
 
+        DateOnly? clientToday = !string.IsNullOrEmpty(localDate) && DateOnly.TryParse(localDate, out var parsedDate)
+            ? parsedDate
+            : null;
+
         await _context.SaveChangesAsync();
-        return Ok(MapToResponseDto(habit));
+        return Ok(MapToResponseDto(habit, clientToday));
     }
 
     [HttpDelete("{id}")]
@@ -116,7 +129,7 @@ public class HabitsController : ControllerBase
     }
 
     [HttpPost("reorder")]
-    public async Task<IActionResult> Reorder(ReorderHabitsDto dto)
+    public async Task<IActionResult> Reorder(ReorderHabitsDto dto, [FromQuery] string? localDate = null)
     {
         var userId = GetUserId();
         var habits = await _context.Habits
@@ -135,17 +148,21 @@ public class HabitsController : ControllerBase
 
         await _context.SaveChangesAsync();
 
+        DateOnly? clientToday = !string.IsNullOrEmpty(localDate) && DateOnly.TryParse(localDate, out var parsedDate)
+            ? parsedDate
+            : null;
+
         var updatedHabits = await _context.Habits
             .Include(h => h.Completions)
             .Where(h => h.UserId == userId)
             .OrderBy(h => h.SortOrder)
             .ToListAsync();
 
-        return Ok(updatedHabits.Select(h => MapToResponseDto(h)).ToList());
+        return Ok(updatedHabits.Select(h => MapToResponseDto(h, clientToday)).ToList());
     }
 
     [HttpPost("{id}/complete")]
-    public async Task<IActionResult> CompleteHabit(int id)
+    public async Task<IActionResult> CompleteHabit(int id, [FromQuery] string? localDate = null)
     {
         var userId = GetUserId();
         var habit = await _context.Habits
@@ -155,7 +172,10 @@ public class HabitsController : ControllerBase
         if (habit == null)
             return NotFound();
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        // Use client's local date if provided, otherwise use server local time
+        var today = !string.IsNullOrEmpty(localDate) && DateOnly.TryParse(localDate, out var parsedDate)
+            ? parsedDate
+            : DateOnly.FromDateTime(DateTime.Now);
 
         if (IsCompletedToday(habit, today))
             return BadRequest(new { message = "Habit already completed today" });
@@ -175,11 +195,11 @@ public class HabitsController : ControllerBase
         habit.Completions.Add(completion);
         await _context.SaveChangesAsync();
 
-        return Ok(MapToResponseDto(habit));
+        return Ok(MapToResponseDto(habit, today));
     }
 
     [HttpDelete("{id}/complete")]
-    public async Task<IActionResult> UncompleteHabit(int id)
+    public async Task<IActionResult> UncompleteHabit(int id, [FromQuery] string? localDate = null)
     {
         var userId = GetUserId();
         var habit = await _context.Habits
@@ -189,7 +209,10 @@ public class HabitsController : ControllerBase
         if (habit == null)
             return NotFound();
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        // Use client's local date if provided, otherwise use server local time
+        var today = !string.IsNullOrEmpty(localDate) && DateOnly.TryParse(localDate, out var parsedDate)
+            ? parsedDate
+            : DateOnly.FromDateTime(DateTime.Now);
         var completion = habit.Completions?.FirstOrDefault(c => c.CompletedDate == today);
 
         if (completion == null)
@@ -199,11 +222,11 @@ public class HabitsController : ControllerBase
         await _context.SaveChangesAsync();
 
         habit.Completions.Remove(completion);
-        return Ok(MapToResponseDto(habit));
+        return Ok(MapToResponseDto(habit, today));
     }
 
     [HttpGet("{id}/completions")]
-    public async Task<IActionResult> GetCompletions(int id, [FromQuery] int days = 30)
+    public async Task<IActionResult> GetCompletions(int id, [FromQuery] int days = 30, [FromQuery] string? localDate = null)
     {
         var userId = GetUserId();
         var habit = await _context.Habits.FirstOrDefaultAsync(h => h.Id == id && h.UserId == userId);
@@ -211,7 +234,10 @@ public class HabitsController : ControllerBase
         if (habit == null)
             return NotFound();
 
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-days));
+        var today = !string.IsNullOrEmpty(localDate) && DateOnly.TryParse(localDate, out var parsedDate)
+            ? parsedDate
+            : DateOnly.FromDateTime(DateTime.Now);
+        var startDate = today.AddDays(-days);
         var completions = await _context.HabitCompletions
             .Where(c => c.HabitId == id && c.CompletedDate >= startDate)
             .OrderByDescending(c => c.CompletedDate)
@@ -228,7 +254,7 @@ public class HabitsController : ControllerBase
     }
 
     [HttpGet("{id}/stats")]
-    public async Task<IActionResult> GetStats(int id, [FromQuery] int days = 30)
+    public async Task<IActionResult> GetStats(int id, [FromQuery] int days = 30, [FromQuery] string? localDate = null)
     {
         var userId = GetUserId();
         var habit = await _context.Habits
@@ -238,13 +264,17 @@ public class HabitsController : ControllerBase
         if (habit == null)
             return NotFound();
 
-        var stats = CalculateStats(habit, days);
+        DateOnly? clientToday = !string.IsNullOrEmpty(localDate) && DateOnly.TryParse(localDate, out var parsedDate)
+            ? parsedDate
+            : null;
+
+        var stats = CalculateStats(habit, days, clientToday);
         return Ok(stats);
     }
 
-    private HabitResponseDto MapToResponseDto(Habit habit)
+    private HabitResponseDto MapToResponseDto(Habit habit, DateOnly? clientToday = null)
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = clientToday ?? DateOnly.FromDateTime(DateTime.Now);
         var createdDate = DateOnly.FromDateTime(habit.CreatedAt);
         var daysSinceCreation = today.DayNumber - createdDate.DayNumber + 1;
         var totalCompletions = habit.Completions?.Count ?? 0;
@@ -260,7 +290,7 @@ public class HabitsController : ControllerBase
             UpdatedAt = habit.UpdatedAt,
             IsCompletedToday = IsCompletedToday(habit, today),
             LastCompletedAt = habit.Completions?.MaxBy(c => c.CompletedAt)?.CompletedAt,
-            CurrentStreak = CalculateCurrentStreak(habit),
+            CurrentStreak = CalculateCurrentStreak(habit, today),
             TotalCompletions = totalCompletions,
             CompletionRate = Math.Round(completionRate, 1)
         };
@@ -271,7 +301,7 @@ public class HabitsController : ControllerBase
         return habit.Completions?.Any(c => c.CompletedDate == today) ?? false;
     }
 
-    private int CalculateCurrentStreak(Habit habit)
+    private int CalculateCurrentStreak(Habit habit, DateOnly? clientToday = null)
     {
         if (habit.Completions == null || !habit.Completions.Any())
             return 0;
@@ -285,7 +315,7 @@ public class HabitsController : ControllerBase
         if (!sortedDates.Any())
             return 0;
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = clientToday ?? DateOnly.FromDateTime(DateTime.Now);
         var streak = 0;
         var expectedDate = today;
 
@@ -310,9 +340,9 @@ public class HabitsController : ControllerBase
         return streak;
     }
 
-    private HabitStatsDto CalculateStats(Habit habit, int days)
+    private HabitStatsDto CalculateStats(Habit habit, int days, DateOnly? clientToday = null)
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = clientToday ?? DateOnly.FromDateTime(DateTime.Now);
         var startDate = today.AddDays(-days);
 
         var completionDates = habit.Completions?
@@ -335,7 +365,7 @@ public class HabitsController : ControllerBase
             HabitId = habit.Id,
             HabitTitle = habit.Title,
             TotalCompletions = habit.Completions?.Count ?? 0,
-            CurrentStreak = CalculateCurrentStreak(habit),
+            CurrentStreak = CalculateCurrentStreak(habit, today),
             LongestStreak = 0,
             CompletionRateLastMonth = days > 0 ? (double)completionDates.Count / days * 100 : 0,
             CompletionHistory = history

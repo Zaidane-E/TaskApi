@@ -25,7 +25,6 @@ secrets.json
 *.csproj.user
 *.rsuser
 *.sln.docstates
-launchSettings.json
 
 # Angular / Node
 node_modules/
@@ -35,6 +34,7 @@ npm-debug.log
 yarn-error.log
 .npm/
 .yarn/
+.vercel/
 
 # IDE
 .idea/
@@ -58,6 +58,14 @@ appsettings.Local.json
 appsettings.*.local.json
 **/appsettings.Development.json
 **/appsettings.Local.json
+**/Properties/launchSettings.json
+
+# Azure
+*.azurepubxml
+*.pubxml
+*.publishsettings
 
 # Claude Code
 .claude/
+DEPLOYMENT.md
+backend/TaskAPI/appsettings.Development.example.json

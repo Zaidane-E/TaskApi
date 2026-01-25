@@ -71,7 +71,7 @@ public class TasksController : ControllerBase
         {
             Title = dto.Title,
             Priority = dto.Priority,
-            DueDate = dto.DueDate,
+            DueDate = dto.DueDate.HasValue ? DateTime.SpecifyKind(dto.DueDate.Value, DateTimeKind.Utc) : null,
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -93,7 +93,7 @@ public class TasksController : ControllerBase
         task.Title = dto.Title;
         task.IsCompleted = dto.IsCompleted;
         task.Priority = dto.Priority;
-        task.DueDate = dto.DueDate;
+        task.DueDate = dto.DueDate.HasValue ? DateTime.SpecifyKind(dto.DueDate.Value, DateTimeKind.Utc) : null;
         task.UpdatedAt = DateTime.UtcNow;
 
         if (!wasCompleted && dto.IsCompleted)
